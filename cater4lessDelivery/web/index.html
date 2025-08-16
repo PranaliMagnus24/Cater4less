@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base href="/">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="A multi-vendor e-commerce web app.">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="eFood Multivendor">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="favicon.png"/>
+
+  <title>eFood Multivendor</title>
+  <link rel="manifest" href="manifest.json">
+  <link rel="stylesheet" type="text/css" href="style.css">
+
+  <!-- Flutter JS Loader -->
+  <script src="flutter.js" defer></script>
+</head>
+<body>
+  <!-- Google Maps -->
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBDkMWkeYZ_84b4Oqby4SNpPw2SZSrUx90"></script>
+
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.6.1/firebase-messaging.js"></script>
+
+  <div class="center">
+    <img src="logo.png" alt="logo" height="250px" width="250px" />
+    <br>
+    <div class="loader" style="width:250px;text-align: center;"><div class="classic-10"></div></div>
+  </div>
+
+  <script>
+    var firebaseConfig = {
+      apiKey: "AIzaSyCU5TmqqAL4Nkl_9TxEMRUeCvCs0_TZ-ec",
+      authDomain: "cater4lessdelivery.firebaseapp.com",
+      projectId: "cater4lessdelivery",
+      storageBucket: "cater4lessdelivery.firebasestorage.app",
+      messagingSenderId: "553404915448",
+      appId: "1:553404915448:web:a69c90e3a1dbd3124ea50d",
+      measurementId: "G-J5HMN3RPR8"
+    };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+
+  <!-- New Flutter initialization -->
+  <script>
+    window.addEventListener('load', function(ev) {
+      _flutter.loader.load({
+        serviceWorker: {
+          serviceWorkerVersion: serviceWorkerVersion,
+          scriptUrl: 'flutter_service_worker.js'
+        }
+      }).then(function(engineInitializer) {
+        return engineInitializer.initializeEngine();
+      }).then(function(appRunner) {
+        // Register additional Firebase messaging service worker
+        if ('serviceWorker' in navigator) {
+          navigator.serviceWorker.register('/firebase-messaging-sw.js');
+        }
+        return appRunner.runApp();
+      });
+    });
+  </script>
+</body>
+</html>

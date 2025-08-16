@@ -1,0 +1,28 @@
+{
+  "buildFiles": [
+    "/Users/altafrazzaque/flutter/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/altafrazzaque/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/Users/altafrazzaque/Downloads/OneDrive_1_2-28-2025/codecanyon-C6Exj26S-stackfood-multi-restaurant-food-delivery-app-with-laravel-admin-and-restaurant-panel-v10/User app and web/android/app/.cxx/Debug/44g354s1/armeabi-v7a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/altafrazzaque/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/Users/altafrazzaque/Downloads/OneDrive_1_2-28-2025/codecanyon-C6Exj26S-stackfood-multi-restaurant-food-delivery-app-with-laravel-admin-and-restaurant-panel-v10/User app and web/android/app/.cxx/Debug/44g354s1/armeabi-v7a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {},
+  "toolchains": {
+    "toolchain": {
+      "cCompilerExecutable": "/Users/altafrazzaque/Library/Android/sdk/ndk/25.1.8937393/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang.lld",
+      "cppCompilerExecutable": "/Users/altafrazzaque/Library/Android/sdk/ndk/25.1.8937393/toolchains/llvm/prebuilt/darwin-x86_64/bin/clang++.lld"
+    }
+  },
+  "cFileExtensions": [],
+  "cppFileExtensions": []
+}

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "950046010068",
+    "project_id": "cater4lessrestaurant-c9bfa",
+    "storage_bucket": "cater4lessrestaurant-c9bfa.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:950046010068:android:24de05e28b345e4172a941",
+        "android_client_info": {
+          "package_name": "com.sixamtech.stack_food_vandor"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAAVIHh2_lStFRroeZieiBXaH48SQShm4c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

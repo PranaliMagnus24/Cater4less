@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "/Users/altafrazzaque/flutter/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/altafrazzaque/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/Users/altafrazzaque/Downloads/OneDrive_1_2-28-2025/codecanyon-IDmYmton-stackfood-multi-restaurant-food-ordering-restaurant-app-v10/Restaurant app/android/app/.cxx/RelWithDebInfo/6lc5a66q/x86",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/altafrazzaque/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/Users/altafrazzaque/Downloads/OneDrive_1_2-28-2025/codecanyon-IDmYmton-stackfood-multi-restaurant-food-ordering-restaurant-app-v10/Restaurant app/android/app/.cxx/RelWithDebInfo/6lc5a66q/x86",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}
