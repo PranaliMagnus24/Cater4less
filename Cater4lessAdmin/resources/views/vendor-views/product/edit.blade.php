@@ -127,6 +127,40 @@
                         </div>
                     </div>
                 </div>
+                                <!----PDF Upload--->
+                <!----PDF Upload--->
+<div class="col-lg-6">
+    <div class="card shadow--card-2 border-0 h-100">
+        <div class="card-body">
+            <h5 class="card-title">
+                <span>{{ translate('Food PDF (Optional)') }}</span>
+            </h5>
+            <div class="form-group mb-0 h-100 d-flex flex-column align-items-center justify-content-center">
+                <label>
+                    <center id="pdf-viewer-section" class="my-auto">
+
+                        @if ($product?->pdf_full_url)
+    <i class="tio-file-outlined" style="font-size: 40px;"></i>
+    <p class="mt-2 text-success">{{ translate('PDF already uploaded') }}</p>
+    <a href="{{ $product->pdf_full_url }}" target="_blank" class="btn btn-sm btn-primary mt-2">
+        {{ translate('View PDF') }}
+    </a>
+@else
+    <i class="tio-file-outlined" style="font-size: 40px;"></i>
+    <p class="mt-2">{{ translate('Upload PDF') }}</p>
+@endif
+
+
+                        <input type="file" name="pdf_file" id="customFilePdf"
+                               class="d-none" accept="application/pdf">
+
+                    </center>
+                </label>
+            </div>
+        </div>
+    </div>
+</div>
+
                 <div class="col-lg-12">
                     <div class="card shadow--card-2 border-0">
                         <div class="card-header">

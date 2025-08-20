@@ -250,7 +250,7 @@
                                     </div>
                                 </div>
                             </td>
-                            <td>
+                            {{-- <td>
                                 <div class="d-flex">
                                     <div class="mx-auto">
                                         <label class="toggle-switch toggle-switch-sm mr-2" data-toggle="tooltip" data-placement="top" title="{{ translate('messages.Change_food_visibility_to_customers') }}" for="statusCheckbox{{$food->id}}">
@@ -261,7 +261,28 @@
                                         </label>
                                     </div>
                                 </div>
-                            </td>
+                            </td> --}}
+                            <!-- In your vendor food list table -->
+<td>
+    <div class="d-flex">
+        <div class="mx-auto">
+            @if($food->status == 0)
+                <span class="badge badge-warning">{{ translate('Pending Approval') }}</span>
+            @elseif($food->status == 1)
+                <label class="toggle-switch toggle-switch-sm mr-2" data-toggle="tooltip" data-placement="top" title="{{ translate('messages.Change_food_visibility_to_customers') }}" for="statusCheckbox{{$food->id}}">
+                    <input type="checkbox" data-url="{{route('vendor.food.status',[$food['id'],$food->status?0:1])}}" class="toggle-switch-input redirect-url" id="statusCheckbox{{$food->id}}" {{$food->status?'checked':''}}>
+                    <span class="toggle-switch-label">
+                        <span class="toggle-switch-indicator"></span>
+                    </span>
+                </label>
+            @elseif($food->status == 2)
+                <span class="badge badge-danger" data-toggle="tooltip" data-placement="top" title="{{ $food->denial_reason ?? 'No reason provided' }}">
+                    {{ translate('Denied') }}
+                </span>
+            @endif
+        </div>
+    </div>
+</td>
                             <td>
                                 <div class="btn--container justify-content-center">
                                     @if($stock_out)

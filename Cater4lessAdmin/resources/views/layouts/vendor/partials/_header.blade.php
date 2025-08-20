@@ -90,6 +90,38 @@
                         </div>
                         <!-- End Notification -->
                     </li>
+                    <li class="nav-item d-none d-sm-inline-block mr-4">
+    <!-- Notification Bell -->
+    <div class="hs-unfold">
+        <a class="js-hs-unfold-invoker btn btn-icon btn-soft-secondary rounded-circle"
+           id="notificationDropdown"
+           data-toggle="dropdown"
+           aria-haspopup="true"
+           aria-expanded="false">
+            <i class="tio-notifications-outlined"></i>
+            <span id="notification-badge" class="btn-status btn-sm-status btn-status-danger d-none"></span>
+        </a>
+        <div class="dropdown-menu dropdown-menu-right navbar-dropdown-menu"
+             aria-labelledby="notificationDropdown">
+            <div class="position-relative">
+                <div class="dropdown-header">
+                    <h4 class="mb-0">{{ translate('Notifications') }}</h4>
+                    <a id="mark-all-read" class="text-primary" href="javascript:">
+                        {{ translate('Mark all as read') }}
+                    </a>
+                </div>
+                <div class="dropdown-body-height dropdown-body-lg">
+                    <div class="list-group list-group-flush" id="notification-list">
+                        <!-- Notifications will be loaded here via AJAX -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- End Notification Bell -->
+</li>
+
+                    </li>
                     <li class="nav-item">
                         <!-- Notification -->
                         <div class="hs-unfold">
@@ -544,4 +576,56 @@ $subscription_deadline_warning_message = \App\Models\BusinessSetting::where('key
             });
         });
     });
+
+    // Load notifications
+function loadNotifications() {
+    $.get('/vendor/notifications', function(response) {
+        let html = '';
+        if (response.notifications.length > 0) {
+            response.notifications.forEach(notification => {
+                html += `
+                <div class="list-group-item list-group-item-action" data-id="${notification.id}">
+                    <div class="d-flex">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">${notification.message}</h6>
+                            ${notification.denial_reason ? `<small class="text-danger">${notification.denial_reason}</small><br>` : ''}
+                            <small class="text-muted">${timeAgo(notification.created_at)}</small>
+                        </div>
+                        <button class="btn btn-sm btn-icon mark-as-read" data-id="${notification.id}">
+                            <i class="tio-checkmark-circle-outlined"></i>
+                        </button>
+                    </div>
+                </div>`;
+            });
+            $('#notification-badge').removeClass('d-none'); // show red dot
+        } else {
+            html = `<div class="list-group-item text-center">{{ translate('No new notifications') }}</div>`;
+            $('#notification-badge').addClass('d-none'); // hide red dot
+        }
+        $('#notification-list').html(html);
+    });
+}
+
+// Mark notification as read
+$(document).on('click', '.mark-as-read', function() {
+    const id = $(this).data('id');
+    $.post('/vendor/notification/mark-read/' + id, function() {
+        $(`[data-id="${id}"]`).remove();
+        loadNotifications();
+    });
+});
+
+// Mark all as read
+$('#mark-all-read').click(function() {
+    $.post('/vendor/notifications/mark-all-read', function() {
+        loadNotifications();
+    });
+});
+
+// Load notifications on page load and every 30 seconds
+$(document).ready(function() {
+    loadNotifications();
+    setInterval(loadNotifications, 30000);
+});
+
 </script>

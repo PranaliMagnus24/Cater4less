@@ -94,6 +94,15 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
             Route::post('bulk-import', 'FoodController@bulk_import_data');
             Route::get('bulk-export', 'FoodController@bulk_export_index')->name('bulk-export-index');
             Route::post('bulk-export', 'FoodController@bulk_export_data')->name('bulk-export');
+
+            //New food approval list
+            Route::get('pending/list', 'FoodController@pending')->name('pending');
+            Route::get('denied/list', 'FoodController@denied')->name('denied');
+
+            Route::post('{id}/approve', 'FoodController@approveFood')->name('approve');
+            Route::post('{id}/deny', 'FoodController@denyFood')->name('deny');
+            Route::post('notification-count', 'FoodController@getNotificationCount')->name('notification-count');
+
         });
 
         Route::group(['prefix' => 'banner', 'as' => 'banner.', 'middleware' => ['module:banner']], function () {

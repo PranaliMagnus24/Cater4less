@@ -73,6 +73,20 @@
                         </div>
                     </li>
                     <li class="nav-item d-none d-sm-inline-block mr-4">
+                        @php($food_notifications = \App\Models\FoodApprovalNotification::where('is_read', 0)->where('type', 'pending')->count())
+                        <!-- Food Notification -->
+                        <div class="hs-unfold">
+                            <a class="js-hs-unfold-invoker btn btn-icon btn-soft-secondary rounded-circle"
+                            href="{{ route('admin.food.pending') }}">
+                            <i class="tio-fastfood"></i>
+                                @if($food_notifications > 0)
+                                <span class="btn-status btn-status-danger">{{ $food_notifications > 9 ? '9+' : $food_notifications }}</span>
+                                @endif
+                            </a>
+                        </div>
+                        <!-- End Food Notification -->
+                    </li>
+                    <li class="nav-item d-none d-sm-inline-block mr-4">
                         <!-- Notification -->
                         <div class="hs-unfold">
                             <a class="js-hs-unfold-invoker btn btn-icon btn-soft-secondary rounded-circle"

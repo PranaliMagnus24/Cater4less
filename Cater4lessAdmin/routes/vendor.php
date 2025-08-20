@@ -122,12 +122,17 @@ Route::group(['namespace' => 'Vendor', 'as' => 'vendor.'], function () {
             Route::post('update-stock', 'FoodController@updateStock')->name('updateStock');
             Route::post('/add-to-session', 'FoodController@addToSession')->name('addToSession');
 
-
             //Import and export
             Route::get('bulk-import', 'FoodController@bulk_import_index')->name('bulk-import');
             Route::post('bulk-import', 'FoodController@bulk_import_data');
             Route::get('bulk-export', 'FoodController@bulk_export_index')->name('bulk-export-index');
             Route::post('bulk-export', 'FoodController@bulk_export_data')->name('bulk-export');
+
+            //Food approval notification
+            Route::get('/notifications', 'FoodController@getVendorNotifications');
+            Route::post('/notification/mark-read/{id}', 'FoodController@markNotificationAsRead');
+            Route::post('/notifications/mark-all-read', 'FoodController@markAllNotificationsAsRead');
+
         });
 
         Route::group(['prefix' => 'banner', 'as' => 'banner.', 'middleware' => ['module:banner','subscription:banner']], function () {

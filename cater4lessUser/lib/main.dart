@@ -50,26 +50,30 @@ Future<void> main() async {
 
   if(GetPlatform.isWeb) {
     await Firebase.initializeApp(options: const FirebaseOptions(
-      // apiKey: 'AIzaSyCc3OCd5I2xSlnftZ4bFAbuCzMhgQHLivA',
-      // appId: '1:491987943015:android:fe79b69339834d5c8f1ec2',
-      // messagingSenderId: '491987943015',
-      // projectId: 'stackmart-500c7',
-      apiKey: "AIzaSyASaZpjAF5_9tXPDbCf9amYKv2us2pcWXQ",
-  authDomain: "cater4lessuserweb.firebaseapp.com",
-  projectId: "cater4lessuserweb",
-  storageBucket: "cater4lessuserweb.firebasestorage.app",
-  messagingSenderId: "299673997711",
-  appId: "1:299673997711:web:d33bdc1f3c61ce51b63bfa",
-  measurementId: "G-H2FSSZBM7C"
+      apiKey: 'AIzaSyCc3OCd5I2xSlnftZ4bFAbuCzMhgQHLivA',
+      appId: '1:491987943015:android:fe79b69339834d5c8f1ec2',
+      messagingSenderId: '491987943015',
+      projectId: 'stackmart-500c7',
+  //     apiKey: "AIzaSyASaZpjAF5_9tXPDbCf9amYKv2us2pcWXQ",
+  // authDomain: "cater4lessuserweb.firebaseapp.com",
+  // projectId: "cater4lessuserweb",
+  // storageBucket: "cater4lessuserweb.firebasestorage.app",
+  // messagingSenderId: "299673997711",
+  // appId: "1:299673997711:web:d33bdc1f3c61ce51b63bfa",
+  // measurementId: "G-H2FSSZBM7C"
     ));
     MetaSEO().config();
   }else if(GetPlatform.isAndroid) {
     await Firebase.initializeApp(
       options: const FirebaseOptions(
-        apiKey: 'AIzaSyCc3OCd5I2xSlnftZ4bFAbuCzMhgQHLivA',
-        appId: '1:491987943015:android:fe79b69339834d5c8f1ec2',
-        messagingSenderId: '491987943015',
-        projectId: 'stackmart-500c7',
+        // apiKey: 'AIzaSyCc3OCd5I2xSlnftZ4bFAbuCzMhgQHLivA',
+        // appId: '1:491987943015:android:fe79b69339834d5c8f1ec2',
+        // messagingSenderId: '491987943015',
+        // projectId: 'stackmart-500c7',
+         apiKey: 'AIzaSyAJz5rnYhgK65kV1CTy_lKlqrCsp7nAHrY',
+        appId: '1:659846062825:android:b8545b87f300b117ee4678',
+        messagingSenderId: '659846062825',
+        projectId: 'cater4less-c8de6',
       ),
     );
   } else {

@@ -647,6 +647,27 @@ $order_sch = \App\Models\Order::Notpos()
                                         <span class="text-truncate">{{ translate('messages.list') }}</span>
                                     </a>
                                 </li>
+                                <!----new--->
+                                {{-- <li
+                                    class="nav-item {{ Request::is('admin/food/pending') || Request::is('admin/food/view/*') ? 'active' : '' }}">
+                                    <a class="nav-link " href="{{ route('admin.food.pending') }}"
+                                        title="{{ translate('messages.new_approval_request') }}">
+                                        <span class="tio-circle nav-indicator-icon"></span>
+                                        <span class="text-truncate">{{ translate('messages.new_approval_request') }}</span>
+                                        <span class="badge badge-soft-danger badge-pill ml-1">0</span>
+                                    </a>
+
+                                </li> --}}
+                                <li class="nav-item {{ Request::is('admin/food/pending') || Request::is('admin/food/view/*') ? 'active' : '' }}">
+    <a class="nav-link " href="{{ route('admin.food.pending') }}"
+        title="{{ translate('messages.new_approval_request') }}">
+        <span class="tio-circle nav-indicator-icon"></span>
+        <span class="text-truncate">{{ translate('messages.new_approval_request') }}</span>
+        <span class="badge badge-soft-danger badge-pill ml-1" id="food-approval-count">
+            {{ App\Models\FoodApprovalNotification::pending()->unread()->count() }}
+        </span>
+    </a>
+</li>
                                 <li class="nav-item {{ Request::is('admin/food/reviews') ? 'active' : '' }}">
                                     <a class="nav-link " href="{{ route('admin.food.reviews') }}"
                                         title="{{ translate('messages.review_list') }}">
@@ -1811,14 +1832,17 @@ $order_sch = \App\Models\Order::Notpos()
 
 
                 <!--addon end-->
+                <!---Gift Card-->
                 <li
                     class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/react*') ? 'active' : '' }}">
-                    <a class="nav-link " href=""
+                    <a class="nav-link" href="{{ route('admin.gift_cards.index')}}"
                         title="{{ translate('messages.gift_card') }}">
-                        <span class="tio-rear-window-defrost nav-icon"></span>
+                        <i class="tio-gift nav-icon"></i>
+                        {{-- <span class="tio-rear-window-defrost nav-icon"></span> --}}
                         <span class="text-truncate">{{ translate('messages.gift_card') }}</span>
                     </a>
                 </li>
+                <!-- End Gift Card -->
 
                 <li class="nav-item pt-100px">
 
