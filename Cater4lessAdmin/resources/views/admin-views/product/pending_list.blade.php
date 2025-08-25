@@ -283,7 +283,21 @@
                                                 <span class="text-danger">-</span>
                                             @endif
                                         </td>
-                                        <td>{{ Str::limit($notification->message, 30, '...') }}</td>
+                                        {{-- <td>{{ Str::limit($notification->message, 30, '...') }}</td> --}}
+                                        <td>
+                                            @if(Str::contains($notification->message, '<a'))
+                                                {{ Str::limit(strip_tags($notification->message), 50, '...') }}
+                                            <br>
+                                                {!! preg_replace('/^.*?(<a .*<\/a>).*$/', '$1', $notification->message) !!}
+                                            @else
+                                                {{ Str::limit(strip_tags($notification->message), 50, '...') }}
+                                            @endif
+                                            <span class="input-label-secondary" data-toggle="tooltip"
+                                            data-placement="right"
+                                            data-original-title="{{ strip_tags($notification->message) }}"><img
+                                            src="{{ dynamicAsset('/public/assets/admin/img/info-circle.svg') }}"
+                                            alt="{{ translate('messages.category_required_warning') }}"></span>
+                                        </td>
                                         <td>{{ $notification->created_at->format('d M Y') }}</td>
                                         <td>
                                             <div class="btn--container justify-content-center">

@@ -659,15 +659,15 @@ $order_sch = \App\Models\Order::Notpos()
 
                                 </li> --}}
                                 <li class="nav-item {{ Request::is('admin/food/pending') || Request::is('admin/food/view/*') ? 'active' : '' }}">
-    <a class="nav-link " href="{{ route('admin.food.pending') }}"
-        title="{{ translate('messages.new_approval_request') }}">
-        <span class="tio-circle nav-indicator-icon"></span>
-        <span class="text-truncate">{{ translate('messages.new_approval_request') }}</span>
-        <span class="badge badge-soft-danger badge-pill ml-1" id="food-approval-count">
-            {{ App\Models\FoodApprovalNotification::pending()->unread()->count() }}
-        </span>
-    </a>
-</li>
+                                    <a class="nav-link " href="{{ route('admin.food.pending') }}"
+                                    title="{{ translate('messages.new_approval_request') }}">
+                                    <span class="tio-circle nav-indicator-icon"></span>
+                                    <span class="text-truncate">{{ translate('messages.new_approval_request') }}</span>
+                                    <span class="badge badge-soft-danger badge-pill ml-1" id="food-approval-count">
+                                        {{ App\Models\FoodApprovalNotification::pending()->unread()->count() }}
+                                    </span>
+                                </a>
+                            </li>
                                 <li class="nav-item {{ Request::is('admin/food/reviews') ? 'active' : '' }}">
                                     <a class="nav-link " href="{{ route('admin.food.reviews') }}"
                                         title="{{ translate('messages.review_list') }}">
@@ -1032,7 +1032,42 @@ $order_sch = \App\Models\Order::Notpos()
                                 </span>
                             </a>
                         </li>
-
+                        <!------3rd Party Company --->
+                        <li
+                            class="navbar-vertical-aside-has-menu {{ Request::is('admin/third-party-company*') ? 'active' : '' }}">
+                            <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle" href="javascript:"
+                                title="{{ translate('messages.3rd_Party_Company') }}">
+                                <i class="tio-plugin nav-icon"></i>
+                                <span
+                                    class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">{{ translate('messages.3rd_Party_Company') }}</span>
+                            </a>
+                            <ul class="js-navbar-vertical-aside-submenu nav nav-sub"
+                                style="display: {{ Request::is('admin/third-party-company*') ? 'block' : 'none' }}">
+                                <li
+                                    class="navbar-vertical-aside-has-menu {{ Request::is('admin/third-party-company/list/*') || Request::is('admin/third-party-company/list') || Request::is('admin/third-party-company/list') ? 'active' : '' }}">
+                                    <a class="js-navbar-vertical-aside-menu-link nav-link"
+                                        href="{{ route('admin.third-party-company.list') }}"
+                                        title="{{ translate('messages.Company_List') }}">
+                                        <span class="tio-circle nav-indicator-icon"></span>
+                                        <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">
+                                            {{ translate('messages.company_list') }}
+                                        </span>
+                                    </a>
+                                </li>
+                                <li
+                                    class="navbar-vertical-aside-has-menu {{ Request::is('admin/third-party-company/add/*') || Request::is('admin/third-party-company/add') || Request::is('admin/third-party-company/add') ? 'active' : '' }}">
+                                    <a class="js-navbar-vertical-aside-menu-link nav-link"
+                                        href="{{ route('admin.third-party-company.add') }}"
+                                        title="{{ translate('messages.Company_Add') }}">
+                                        <span class="tio-circle nav-indicator-icon"></span>
+                                        <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">
+                                            {{ translate('messages.company_add') }}
+                                        </span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                        <!----End 3rd Party Company ---->
                         <li
                             class="navbar-vertical-aside-has-menu {{ Request::is('admin/delivery-man*') ? 'active' : '' }}">
                             <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle" href="javascript:"

@@ -244,14 +244,29 @@ class FoodController extends Controller
         }
         //For custome notification
         try {
+            $message = 'New food item "' . $food->name . '" awaiting approval';
+            if ($food->pdf_file) {
+                $pdfUrl = asset('storage/product/' . $food->pdf_file);
+                $message .= ' - <a href="' . $pdfUrl . '" target="_blank">View PDF</a>';
+            }
+
             $notification = FoodApprovalNotification::create([
                 'food_id' => $food->id,
                 'vendor_id' => Helpers::get_vendor_id(),
                 'restaurant_id' => Helpers::get_restaurant_id(),
                 'type' => 'pending',
                 'is_read' => false,
-                'message' => 'New food item "' . $food->name . '" awaiting approval'
+                'message' => $message
             ]);
+
+            // $notification = FoodApprovalNotification::create([
+            //     'food_id' => $food->id,
+            //     'vendor_id' => Helpers::get_vendor_id(),
+            //     'restaurant_id' => Helpers::get_restaurant_id(),
+            //     'type' => 'pending',
+            //     'is_read' => false,
+            //     'message' => 'New food item "' . $food->name . '" awaiting approval'
+            // ]);
             \Log::info('Notification created:', $notification->toArray());
         } catch (\Exception $e) {
             \Log::error('Notification creation failed:', ['error' => $e->getMessage()]);
@@ -506,33 +521,59 @@ class FoodController extends Controller
         $p->is_halal = $request->is_halal ?? 0;
         $p->sell_count = 0;
 
+        $p->status = 0;
         $p->save();
-        // Create notification only if status changed to pending
-       if ($p->status != 0) {
-        $p->status = 0; // Assuming 0 means pending
-            // Check if there's already a pending notification for this food
-            $existingNotification = FoodApprovalNotification::where('food_id', $p->id)
-                ->where('type', 'pending')
-                ->first();
+       $existingNotification = FoodApprovalNotification::where('food_id', $p->id)
+    ->where('type', 'pending')
+    ->first();
 
-            if (!$existingNotification) {
-                FoodApprovalNotification::create([
-                    'food_id' => $p->id,
-                    'vendor_id' => Helpers::get_vendor_id(),
-                    'restaurant_id' => Helpers::get_restaurant_id(),
-                    'type' => 'pending',
-                    'is_read' => false,
-                    'message' => 'Food item "' . $p->name . '" has been updated and needs re-approval'
-                ]);
-            } else {
-                // Update existing notification instead of creating duplicate
-                $existingNotification->update([
-                    'message' => 'Food item "' . $p->name . '" has been updated and needs re-approval',
-                    'is_read' => false, // Mark as unread again
-                    'updated_at' => now()
-                ]);
-            }
-        }
+// Build notification message
+$message = 'Food item "' . $p->name . '" has been updated and needs re-approval';
+if ($p->pdf_file) {
+    $pdfUrl = asset('storage/product/' . $p->pdf_file);
+    $message .= ' - <a href="' . $pdfUrl . '" target="_blank">View PDF</a>';
+}
+
+if (!$existingNotification) {
+    FoodApprovalNotification::create([
+        'food_id' => $p->id,
+        'vendor_id' => Helpers::get_vendor_id(),
+        'restaurant_id' => Helpers::get_restaurant_id(),
+        'type' => 'pending',
+        'is_read' => false,
+        'message' => $message,
+    ]);
+} else {
+    $existingNotification->update([
+        'message' => $message,
+        'is_read' => false,
+        'updated_at' => now(),
+    ]);
+}
+
+    //    if ($p->status = 0) {
+    //         $existingNotification = FoodApprovalNotification::where('food_id', $p->id)
+    //             ->where('type', 'pending')
+    //             ->first();
+
+    //         if (!$existingNotification) {
+    //             FoodApprovalNotification::create([
+    //                 'food_id' => $p->id,
+    //                 'vendor_id' => Helpers::get_vendor_id(),
+    //                 'restaurant_id' => Helpers::get_restaurant_id(),
+    //                 'type' => 'pending',
+    //                 'is_read' => false,
+    //                 'message' => 'Food item "' . $p->name . '" has been updated and needs re-approval'
+    //             ]);
+    //         } else {
+
+    //             $existingNotification->update([
+    //                 'message' => 'Food item "' . $p->name . '" has been updated and needs re-approval',
+    //                 'is_read' => false,
+    //                 'updated_at' => now()
+    //             ]);
+    //         }
+    //     }
         $p->tags()->sync($tag_ids);
         $p->nutritions()->sync($nutrition_ids);
         $p->allergies()->sync($allergy_ids);

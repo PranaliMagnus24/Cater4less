@@ -88,6 +88,19 @@
                                         </select>
                                     </div>
                                 </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group m-0">
+                                        <label class="input-label"
+                                            for="exampleFormControlInput1">{{ translate('messages.3rd_party_company') }}</label>
+                                        <select name="third_party_company_id" class="form-control js-select2-custom h--45px" required
+                                            data-placeholder="{{ translate('messages.select_comapny') }}">
+                                            <option value="" readonly="true" hidden="true">{{ translate('Ex:_XYZ_comapny') }}</option>
+                                            @foreach($companies as $company)
+                                            <option value="{{$company->id}}">{{$company->company_name}}</option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 

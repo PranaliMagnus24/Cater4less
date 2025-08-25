@@ -28,7 +28,7 @@ use App\Exports\DeliveryManEarningExport;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rules\Password;
 use App\Exports\SingleDeliveryManReviewExport;
-
+use App\Models\ThirdPartyCompany;
 
 class DeliveryManController extends Controller
 {
@@ -36,14 +36,15 @@ class DeliveryManController extends Controller
     {
         $page_data=   DataSetting::Where('type' , 'deliveryman')->where('key' , 'deliveryman_page_data')->first()?->value;
         $page_data =  $page_data ? json_decode($page_data ,true)  :[];
-        return view('admin-views.delivery-man.index',compact('page_data')) ;
+        $companies = ThirdPartyCompany::where('status', 'active')->orderBy('created_at', 'asc')->get();
+        return view('admin-views.delivery-man.index',compact('page_data','companies')) ;
     }
 
     public function list(Request $request)
     {
         $key = explode(' ', $request['search']);
         $zone_id = $request->query('zone_id', 'all');
-        $delivery_men = DeliveryMan::with(['orders','rating','zone'])->
+        $delivery_men = DeliveryMan::with(['orders','rating','zone','company'])->
         when(is_numeric($zone_id), function($query) use($zone_id){
             return $query->where('zone_id', $zone_id);
         })->where('type','zone_wise')->latest()->where('application_status','approved')
@@ -55,7 +56,10 @@ class DeliveryManController extends Controller
                         ->orWhere('l_name', 'like', "%{$value}%")
                         ->orWhere('email', 'like', "%{$value}%")
                         ->orWhere('phone', 'like', "%{$value}%")
-                        ->orWhere('identity_number', 'like', "%{$value}%");
+                        ->orWhere('identity_number', 'like', "%{$value}%")
+                         ->orWhereHas('company', function($query) use ($value) {
+                            $query->where('company_name', 'like', "%{$value}%");
+                        });
                 }
             });
         })
@@ -240,6 +244,7 @@ class DeliveryManController extends Controller
         $dm->identity_type = $request->identity_type;
         $dm->zone_id = $request->zone_id;
         $dm->vehicle_id = $request->vehicle_id;
+        $dm->third_party_company_id = $request->third_party_company_id;
         $dm->identity_image = $identity_image;
         $dm->image = $image_name;
         $dm->active = 0;
@@ -274,7 +279,8 @@ class DeliveryManController extends Controller
     public function edit($id)
     {
         $delivery_man = DeliveryMan::find($id);
-        return view('admin-views.delivery-man.edit', compact('delivery_man'));
+        $companies = ThirdPartyCompany::where('status', 'active')->orderBy('created_at','asc')->get();
+        return view('admin-views.delivery-man.edit', compact('delivery_man','companies'));
     }
 
     public function status(Request $request)
@@ -467,6 +473,7 @@ class DeliveryManController extends Controller
         $delivery_man->identity_number = $request->identity_number;
         $delivery_man->identity_type = $request->identity_type;
         $delivery_man->zone_id = $request->zone_id;
+        $delivery_man->third_party_company_id = $request->third_party_company_id;
         $delivery_man->identity_image = $identity_image;
         $delivery_man->image = $image_name;
         $delivery_man->earning = $request->earning;
@@ -898,5 +905,7 @@ class DeliveryManController extends Controller
 
         return view('admin-views.delivery-man.pending_list_view', compact('dm'));
     }
+
+
 
 }

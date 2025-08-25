@@ -1,2 +1,0 @@
-/Users/altafrazzaque/Downloads/OneDrive_1_2-28-2025/codecanyon-IDmYmton-stackfood-multi-restaurant-food-ordering-restaurant-app-v10/Restaurant app/android/app/.cxx/Debug/t1w143f6/x86/CMakeFiles/edit_cache.dir
-/Users/altafrazzaque/Downloads/OneDrive_1_2-28-2025/codecanyon-IDmYmton-stackfood-multi-restaurant-food-ordering-restaurant-app-v10/Restaurant app/android/app/.cxx/Debug/t1w143f6/x86/CMakeFiles/rebuild_cache.dir

@@ -85,6 +85,29 @@
                                         </select>
                                     </div>
                                 </div>
+                                <div class="col-sm-6">
+                                    <div class="form-group m-0">
+                                        <label class="input-label" for="exampleFormControlInput1">{{translate('messages.3rd_party_company')}}</label>
+                                        <select name="third_party_company_id" class="form-control js-select2-custom h--45px">
+                                           @foreach($companies as $company)
+                                               <option value="{{ $company->id }}"
+                                                 {{ $company->id == $delivery_man->third_party_company_id ? 'selected' : '' }}>
+                                                 {{ $company->company_name }}
+                                                </option>
+                                            @endforeach
+
+                                        {{-- @foreach(\App\Models\Zone::where('status',1)->get(['id','name']) as $zone)
+                                            @if(isset(auth('admin')->user()->zone_id))
+                                                @if(auth('admin')->user()->zone_id == $zone->id)
+                                                    <option value="{{$zone->id}}" {{$zone->id == $delivery_man->zone_id?'selected':''}}>{{$zone->name}}</option>
+                                                @endif
+                                            @else
+                                            <option value="{{$zone->id}}" {{$zone->id == $delivery_man->zone_id?'selected':''}}>{{$zone->name}}</option>
+                                            @endif
+                                        @endforeach --}}
+                                        </select>
+                                    </div>
+                                </div>
 
                             </div>
                         </div>

@@ -16,6 +16,21 @@ use BeyondCode\LaravelWebSockets\Facades\WebSocketsRouter;
 */
 
 Route::group(['namespace' => 'Api\V1', 'middleware'=>['localization','react']], function () {
+    Route::options('{any}', function () {
+    return response()->json([], 200);
+});
+
+// Dummy
+Route::get('dummy-test', function () {
+    return response()->json([
+        'status' => 'success',
+        'message' => 'Dummy GET route working!',
+        'data' => [
+            'example_key' => 'example_value'
+        ]
+    ]);
+});
+
     Route::get('zone/list', 'ZoneController@get_zones');
     Route::get('zone/check', 'ZoneController@zonesCheck');
     Route::get('advertisement/list', 'AdvertisementController@get_adds');

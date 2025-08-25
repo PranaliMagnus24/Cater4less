@@ -96,6 +96,7 @@
                                 <th class="text-capitalize w-20p">{{translate('messages.name')}}</th>
                                 <th class="text-capitalize">{{ translate('messages.contact') }}</th>
                                 <th class="text-capitalize">{{translate('messages.zone')}}</th>
+                                <th class="text-capitalize">{{ translate('messages.company_name') }}</th>
                                 <th class="text-capitalize text-center">{{ translate('Total_Orders') }}</th>
                                 <th class="text-capitalize">{{translate('messages.availability_status')}}</th>
                                 <th class="text-capitalize text-center w-110px">{{translate('messages.action')}}</th>
@@ -133,6 +134,14 @@
                                         <span>{{translate('messages.zone_deleted')}}</span>
                                         @endif
                                     </td>
+                                    <td>
+                                        @if($dm->company)
+                                        {{ $dm->company->company_name }}
+                                        @else
+                                        <span class="text-muted">{{ translate('messages.not_assigned') }}</span>
+                                        @endif
+                                    </td>
+
                                     <!-- Static Data -->
                                     <td class="text-center">
                                         <div class="pr-3">

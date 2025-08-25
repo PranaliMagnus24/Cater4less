@@ -1,3 +1,4 @@
 {
-    "php.version": "8.1.18"
+    "php.version": "8.1.18",
+    "git.ignoreLimitWarning": true
 }

@@ -20,12 +20,20 @@ class PaymentController extends Controller
             $this->extendWithPaymentGatewayTrait();
         }
     }
-
     private function extendWithPaymentGatewayTrait()
-    {
+{
+    if (!class_exists('ExtendedController')) {
         $extendedControllerClass = $this->generateExtendedControllerClass();
         eval($extendedControllerClass);
     }
+}
+
+
+    // private function extendWithPaymentGatewayTrait()
+    // {
+    //     $extendedControllerClass = $this->generateExtendedControllerClass();
+    //     eval($extendedControllerClass);
+    // }
 
     private function generateExtendedControllerClass()
     {
@@ -55,7 +63,7 @@ class PaymentController extends Controller
         if(!$order){
             return response()->json(['errors' => ['code' => 'order-payment', 'message' => 'Data not found']], 403);
         }
-        
+
         //guest user check
         if ($order->is_guest) {
             $address = json_decode($order['delivery_address'] , true);

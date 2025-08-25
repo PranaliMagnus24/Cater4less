@@ -15,11 +15,38 @@ return [
     |
     */
 
-    'paths' => ['api/*'],
+    // 'paths' => ['api/*'],
+    //  'paths' => ['*'],
+    // 'paths' => ['api/*', 'sanctum/csrf-cookie'],
+    // 'allowed_methods' => ['*'],
+
+    // 'allowed_origins' => [
+    //     'https://c4luser.mytasks.in',
+    //     'https://c4lresturant.mytasks.in',
+    //     'https://c4ldelivery.mytasks.in',
+    // ],
+
+    // 'allowed_origins_patterns' => [],
+
+    // 'allowed_headers' => ['*'],
+
+    // 'exposed_headers' => [],
+
+    // 'max_age' => 0,
+
+    // 'supports_credentials' => true,
+
+
+    'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => [
+        'https://c4luser.mytasks.in',
+        'https://c4lresturant.mytasks.in',
+        'https://c4ldelivery.mytasks.in',
+        'https://cater4less.mytasks.in',
+    ],
 
     'allowed_origins_patterns' => [],
 
@@ -29,6 +56,9 @@ return [
 
     'max_age' => 0,
 
-    'supports_credentials' => false,
+    'supports_credentials' => true,
+
+
+
 
 ];

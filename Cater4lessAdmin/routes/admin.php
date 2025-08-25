@@ -636,6 +636,23 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
             });
         });
 
+
+        //Third Party Company
+         Route::group(['prefix' => 'third-party-company', 'as' => 'third-party-company.'], function () {
+            Route::group(['middleware' => ['module:thirdpartycompany']], function () {
+                 Route::get('add', 'ThirdPartyCompanyController@index')->name('add');
+                Route::post('store', 'ThirdPartyCompanyController@store')->name('store');
+                Route::get('list', 'ThirdPartyCompanyController@list')->name('list');
+                 Route::get('edit/{id}', 'ThirdPartyCompanyController@edit')->name('edit');
+                Route::post('update/{id}', 'ThirdPartyCompanyController@update')->name('update');
+                Route::delete('delete/{id}', 'ThirdPartyCompanyController@delete')->name('delete');
+               Route::post('status/{id}', 'ThirdPartyCompanyController@status')->name('status');
+               Route::get('export/{type}', 'ThirdPartyCompanyController@export')->name('export');
+
+            });
+         });
+
+
         //Pos system
         Route::group(['prefix' => 'pos', 'as' => 'pos.'], function () {
             Route::post('variant_price', 'POSController@variant_price')->name('variant_price');

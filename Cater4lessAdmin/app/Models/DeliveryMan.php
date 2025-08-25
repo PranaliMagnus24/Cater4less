@@ -32,6 +32,11 @@ class DeliveryMan extends Authenticatable
 
     protected $appends = ['image_full_url','identity_image_full_url'];
 
+    public function company()
+{
+    return $this->belongsTo(ThirdPartyCompany::class, 'third_party_company_id');
+}
+
     public function wallet()
     {
         return $this->hasOne(DeliveryManWallet::class);
