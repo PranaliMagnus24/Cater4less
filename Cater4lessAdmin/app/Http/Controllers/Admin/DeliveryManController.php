@@ -250,6 +250,7 @@ class DeliveryManController extends Controller
         $dm->active = 0;
         $dm->earning = $request->earning;
         $dm->password = bcrypt($request->password);
+        $dm->application_status = 'pending';
 
 
         if(isset($request->additional_data)  && count($request->additional_data) > 0){
@@ -287,6 +288,7 @@ class DeliveryManController extends Controller
     {
         $delivery_man = DeliveryMan::find($request->id);
         $delivery_man->status = $request->status;
+        $delivery_man->active = $request->status;
 
         try {
             if ($request->status == 0) {
@@ -384,7 +386,12 @@ class DeliveryManController extends Controller
     {
         $delivery_man = DeliveryMan::findOrFail($request->id);
         $delivery_man->application_status = $request->status;
-        if($request->status == 'approved') $delivery_man->status = 1;
+        if($request->status == 'approved') {
+    $delivery_man->status = 1;
+    $delivery_man->active = 1;
+}
+
+        // if($request->status == 'approved') $delivery_man->status = 1;
         $delivery_man->save();
         try{
             $notification_status= Helpers::getNotificationStatusData('deliveryman','deliveryman_registration_approval');

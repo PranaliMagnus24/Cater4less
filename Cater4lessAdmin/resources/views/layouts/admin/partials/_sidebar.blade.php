@@ -1808,6 +1808,53 @@ $order_sch = \App\Models\Order::Notpos()
                         </span>
                     </a>
                 </li>
+                <!-----Badge Cashback--->
+                <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/badge-cashback*') ? 'active' : '' }}">
+    <a class="js-navbar-vertical-aside-menu-link nav-link nav-link-toggle" href="javascript:"
+        title="{{ translate('Badge_Criteria') }}">
+        <span class="tio-award nav-icon"></span>
+        <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">
+            {{ translate('messages.badge_criteria') }}
+        </span>
+    </a>
+    <ul class="js-navbar-vertical-aside-submenu nav nav-sub"
+        style="display: {{ Request::is('admin/badge-cashback*') ? 'block' : 'none' }}">
+
+        <!-- Add Badging Criteria -->
+        <li class="nav-item {{ Request::is('admin/badge-cashback/list') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.badge-cashback.list') }}"
+                title="{{ translate('messages.Add_Badging_Criteria') }}">
+                <span class="tio-circle nav-indicator-icon"></span>
+                <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">
+                    {{ translate('messages.add_badging_criteria') }}
+                </span>
+            </a>
+        </li>
+
+        <!-- Restaurant Badge List -->
+        <li class="nav-item {{ Request::is('admin/badge-cashback/restaurant-list') ? 'active' : '' }}">
+            <a class="nav-link" href="{{ route('admin.badge-cashback.restaurant_list') }}"
+                title="{{ translate('messages.Badging_Restaurant_List') }}">
+                <span class="tio-circle nav-indicator-icon"></span>
+                <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">
+                    {{ translate('messages.badging_restaurant_list') }}
+                </span>
+            </a>
+        </li>
+    </ul>
+</li>
+
+                {{-- <li
+                    class="navbar-vertical-aside-has-menu {{ Request::is('admin/business-settings/db-index') ? 'active' : '' }}">
+                    <a class="js-navbar-vertical-aside-menu-link nav-link"
+                        href="{{ route('admin.badge-cashback.list') }}"
+                        title="{{ translate('messages.Badge_Criteria') }}">
+                        <i class="tio-award nav-icon"></i>
+                        <span class="navbar-vertical-aside-mini-mode-hidden-elements text-truncate">
+                            {{ translate('messages.badge_criteria') }}
+                        </span>
+                    </a>
+                </li> --}}
 
                 <!-- End web & adpp Settings -->
 
@@ -1878,6 +1925,16 @@ $order_sch = \App\Models\Order::Notpos()
                     </a>
                 </li>
                 <!-- End Gift Card -->
+                <!----promotion bidding--->
+                              <li class="navbar-vertical-aside-has-menu {{ Request::is('admin/promotion*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('admin.promotion.list') }}"
+       title="{{ translate('messages.restaurant_bidding_list') }}">
+        <i class="tio-money nav-icon"></i>
+        <span class="text-truncate">{{ translate('messages.restaurant_bidding_list') }}</span>
+    </a>
+</li>
+
+
 
                 <li class="nav-item pt-100px">
 

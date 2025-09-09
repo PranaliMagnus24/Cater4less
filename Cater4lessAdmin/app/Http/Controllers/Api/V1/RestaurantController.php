@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Models\Coupon;
 use App\Models\Review;
 use App\Models\Restaurant;
+use App\Models\RestaurantBid;
 use Illuminate\Http\Request;
 use App\CentralLogics\Helpers;
 use Illuminate\Support\Facades\DB;
@@ -174,34 +175,129 @@ public function get_details($id)
     ], 200);
 }
 
-    public function get_searched_restaurants(Request $request)
-    {
-        if (!$request->hasHeader('zoneId')) {
-            $errors = [];
-            array_push($errors, ['code' => 'zoneId', 'message' => translate('messages.zone_id_required')]);
-            return response()->json([
-                'errors' => $errors
-            ], 403);
-        }
-        $validator = Validator::make($request->all(), [
-            'name' => 'required',
-        ]);
+    // public function get_searched_restaurants(Request $request)
+    // {
+    //     if (!$request->hasHeader('zoneId')) {
+    //         $errors = [];
+    //         array_push($errors, ['code' => 'zoneId', 'message' => translate('messages.zone_id_required')]);
+    //         return response()->json([
+    //             'errors' => $errors
+    //         ], 403);
+    //     }
+    //     $validator = Validator::make($request->all(), [
+    //         'name' => 'required',
+    //     ]);
 
-        if ($validator->fails()) {
-            return response()->json(['errors' => Helpers::error_processor($validator)], 403);
-        }
+    //     if ($validator->fails()) {
+    //         return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+    //     }
 
-        $type = $request->query('type', 'all');
-        $longitude= $request->header('longitude');
-        $latitude= $request->header('latitude');
-        $zone_id= json_decode($request->header('zoneId'), true);
-        $cuisine = $request->query('cuisine', []) ?? [];
-        $restaurants = RestaurantLogic::search_restaurants(name:$request['name'], zone_id:$zone_id, category_id:$request->category_id,limit:$request['limit'], offset:$request['offset'],type: $type,longitude:$longitude,latitude:$latitude ,popular: $request->popular ,new: $request->new ,rating: $request->rating,
-        rating_3_plus:$request->rating_3_plus,rating_4_plus:$request->rating_4_plus ,rating_5:$request->rating_5 ,
-        discounted: $request->discounted ,sort_by: $request->sort_by , dine_in:  $request->dine_in , open:  $request->open,cuisine: $cuisine );
-        $restaurants['restaurants'] = Helpers::restaurant_data_formatting( data: $restaurants['restaurants'],multi_data: true);
-        return response()->json($restaurants, 200);
+    //     $type = $request->query('type', 'all');
+    //     $longitude= $request->header('longitude');
+    //     $latitude= $request->header('latitude');
+    //     $zone_id= json_decode($request->header('zoneId'), true);
+    //     $cuisine = $request->query('cuisine', []) ?? [];
+    //     $restaurants = RestaurantLogic::search_restaurants(name:$request['name'], zone_id:$zone_id, category_id:$request->category_id,limit:$request['limit'], offset:$request['offset'],type: $type,longitude:$longitude,latitude:$latitude ,popular: $request->popular ,new: $request->new ,rating: $request->rating,
+    //     rating_3_plus:$request->rating_3_plus,rating_4_plus:$request->rating_4_plus ,rating_5:$request->rating_5 ,
+    //     discounted: $request->discounted ,sort_by: $request->sort_by , dine_in:  $request->dine_in , open:  $request->open,cuisine: $cuisine );
+    //     $restaurants['restaurants'] = Helpers::restaurant_data_formatting( data: $restaurants['restaurants'],multi_data: true);
+    //     return response()->json($restaurants, 200);
+    // }
+    public function get_top_bid_restaurants(Request $request)
+{
+    if (!$request->hasHeader('zoneId')) {
+        $errors = [];
+        array_push($errors, ['code' => 'zoneId', 'message' => translate('messages.zone_id_required')]);
+        return response()->json(['errors' => $errors], 403);
     }
+
+    $longitude = $request->header('longitude') ?? 0;
+    $latitude  = $request->header('latitude') ?? 0;
+    $zone_id   = json_decode($request->header('zoneId'), true);
+
+
+    $restaurants = Restaurant::with(['currentBid', 'currentGiftPoint'])
+        ->withOpen($longitude, $latitude)
+        ->whereIn('zone_id', $zone_id)
+        ->Active()
+        ->whereHas('currentBid', function ($q) {
+            $q->where('is_active', true);
+        })
+        ->orderByDesc(
+            RestaurantBid::select('bid_percentage')
+                ->whereColumn('restaurant_id', 'restaurants.id')
+                ->where('is_active', true)
+                ->latest()
+                ->limit(1)
+        )
+        ->paginate($request->limit ?? 20, ['*'], 'page', $request->offset ?? 1);
+
+    $data = [
+        'total_size' => $restaurants->total(),
+        'limit'      => $request->limit ?? 20,
+        'offset'     => $request->offset ?? 1,
+        'restaurants'=> Helpers::restaurant_data_formatting($restaurants->items(), true),
+    ];
+
+    return response()->json($data, 200);
+}
+
+public function get_searched_restaurants(Request $request)
+{
+    if (!$request->hasHeader('zoneId')) {
+        $errors = [];
+        array_push($errors, ['code' => 'zoneId', 'message' => translate('messages.zone_id_required')]);
+        return response()->json(['errors' => $errors], 403);
+    }
+
+    $validator = Validator::make($request->all(), [
+        'name' => 'required',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json(['errors' => Helpers::error_processor($validator)], 403);
+    }
+
+    $type      = $request->query('type', 'all');
+    $longitude = $request->header('longitude');
+    $latitude  = $request->header('latitude');
+    $zone_id   = json_decode($request->header('zoneId'), true);
+    $cuisine   = $request->query('cuisine', []) ?? [];
+
+    $restaurants = RestaurantLogic::search_restaurants(
+        name: $request['name'],
+        zone_id: $zone_id,
+        category_id: $request->category_id,
+        limit: $request['limit'],
+        offset: $request['offset'],
+        type: $type,
+        longitude: $longitude,
+        latitude: $latitude,
+        popular: $request->popular,
+        new: $request->new,
+        rating: $request->rating,
+        rating_3_plus: $request->rating_3_plus,
+        rating_4_plus: $request->rating_4_plus,
+        rating_5: $request->rating_5,
+        discounted: $request->discounted,
+        sort_by: $request->sort_by,
+        dine_in: $request->dine_in,
+        open: $request->open,
+        cuisine: $cuisine
+    );
+
+    $restaurants['restaurants'] = collect($restaurants['restaurants'])
+        ->sortByDesc(function ($restaurant) {
+            return optional($restaurant->currentBid)->bid_percentage ?? 0;
+        })
+        ->values()
+        ->all();
+
+    $restaurants['restaurants'] = Helpers::restaurant_data_formatting(data: $restaurants['restaurants'], multi_data: true);
+
+    return response()->json($restaurants, 200);
+}
+
 
     public function reviews(Request $request)
     {

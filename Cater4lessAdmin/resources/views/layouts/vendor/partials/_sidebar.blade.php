@@ -547,6 +547,17 @@
                         </a>
                     </li>
                     @endif
+                    <!---restaurant biding system-->
+                   <li class="navbar-vertical-aside-has-menu {{ Request::is('vendor/restaurant/promotion*') ? 'active' : '' }}">
+    <a class="nav-link" href="{{ route('vendor.restaurant.promotion.index') }}">
+        <span class="tio-money nav-icon"></span>
+        <span class="text-truncate">{{ translate('messages.Restaurant_Bidding_System') }}</span>
+    </a>
+</li>
+
+
+
+
                     <li class="navbar-vertical-aside-has-menu {{Request::is('restaurant-panel/business-settings/notification-setup')?'active':''}}">
                         <a class="nav-link " href="{{route('vendor.business-settings.notification-setup')}}" title="{{translate('messages.notification_setup')}}"
                         >

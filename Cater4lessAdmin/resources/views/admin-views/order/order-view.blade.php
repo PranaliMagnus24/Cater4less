@@ -1830,8 +1830,67 @@ $max_processing_time = $order->restaurant?explode('-', $order->restaurant['deliv
                                         </div>
                                     </div>
                                 @endforelse
+                                @empty($deliveryMen)
+    <div class="text-center my-3">
+        <img src="{{ dynamicAsset('public/assets/admin/img/dmimage.png') }}" alt="image">
+        <p class="text-muted">{{ translate('Currently_no_deliveryman_available.') }}</p>
+    </div>
+    @if($thirdPartyCompanies->count() > 0)
+        <h5 class="mt-3">{{ translate('messages.Available_3rd_Party_Delivery_Services') }}</h5>
+        <ul class="list-group">
+            @foreach($thirdPartyCompanies as $company)
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div class="d-flex gap-2 align-items-center">
+                        <img src="{{ $company->image_full_url ?? dynamicAsset('public/assets/admin/img/company.png') }}"
+                             class="avatar avatar-60 rounded-10" alt="Company Logo">
+                        <div>
+                            <h6 class="mb-1">{{ $company->company_name }}</h6>
+                            <small>{{ $company->company_type }}</small>
+                        </div>
+                    </div>
+                    <a href="javascript:void(0)"
+                       class="btn btn-sm btn-outline-primary assign-third-party"
+                       data-id="{{ $company->id }}">
+                        {{ translate('messages.Request_Delivery') }}
+                    </a>
+                </li>
+            @endforeach
+        </ul>
+    @else
+        <p class="text-muted">{{ translate('messages.No_third_party_available') }}</p>
+    @endif
+@endempty
+
                             </ul>
                         </div>
+                        <!---New--->
+                        {{-- @if(count($deliveryMen) == 0)
+    <div class="mt-4">
+        <h5>{{ translate('messages.Available_3rd_Party_Delivery_Services') }}</h5>
+        <ul class="list-group">
+            @forelse($thirdPartyCompanies as $company)
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div class="d-flex gap-2 align-items-center">
+                        <img src="{{ $company->image ?? dynamicAsset('public/assets/admin/img/company.png') }}"
+                             class="avatar avatar-60 rounded-10" alt="Company Logo">
+                        <div>
+                            <h6 class="mb-1">{{ $company->company_name }}</h6>
+                            <small>{{ $company->company_type }}</small>
+                        </div>
+                    </div>
+                    <a href="javascript:void(0)"
+                       class="btn btn-sm btn-outline-primary assign-third-party"
+                       data-id="{{ $company->id }}">
+                        {{ translate('messages.Request_Delivery') }}
+                    </a>
+                </li>
+            @empty
+                <p class="text-muted">{{ translate('messages.No_third_party_available') }}</p>
+            @endforelse
+        </ul>
+    </div>
+@endif --}}
+
                         <div class="col-md-7 modal_body_map">
                             <div class="location-map" id="dmassign-map">
                                 <div id="map_canvas"></div>
@@ -2939,6 +2998,31 @@ $max_processing_time = $order->restaurant?explode('-', $order->restaurant['deliv
                 }
             });
         });
+$(document).on('click', '.assign-third-party', function () {
+    let companyId = $(this).data('id');
+    let orderId = "{{ $order->id }}";
+
+    let url = "{{ route('admin.order.assign-third-party', ['order_id' => '__orderId__']) }}";
+    url = url.replace('__orderId__', orderId);
+
+    $.ajax({
+        url: url,
+        method: "POST",
+        data: {
+            _token: "{{ csrf_token() }}",
+            company_id: companyId
+        },
+        success: function (res) {
+            toastr.success(res.success);
+            location.reload();
+        },
+        error: function (err) {
+            toastr.error(err.responseJSON.error ?? 'Something went wrong');
+        }
+    });
+});
+
+
     </script>
 
 @endpush

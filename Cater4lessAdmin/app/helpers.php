@@ -16,6 +16,10 @@ use App\CentralLogics\CustomerLogic;
 use Illuminate\Support\Facades\Mail;
 use App\Models\SubscriptionBillingAndRefundHistory;
 use Brian2694\Toastr\Facades\Toastr;
+use App\Models\GiftCardPayment;
+use App\Models\GiftCard;
+use App\Models\GiftCardShare;
+use App\Models\GiftCardTransaction;
 
 
 if (! function_exists('translate')) {
@@ -323,3 +327,98 @@ if (!function_exists('getWebConfig')) {
         return $config;
     }
 }
+
+/////Gift card payment callbacks
+if (! function_exists('giftcard_success')) {
+    function giftcard_success($data)
+    {
+        try {
+            $payment = GiftCardPayment::find($data->attribute_id);
+            if (! $payment) {
+                \Log::warning('GiftCard payment not found in giftcard_success', ['id' => $data->attribute_id]);
+                return false;
+            }
+
+            // Idempotency: if already processed, return true
+            if ($payment->payment_status === 'success') {
+                return true;
+            }
+
+            \DB::beginTransaction();
+
+            // mark payment success and save external ref if any
+            $payment->payment_method = $data->payment_method ?? $payment->payment_method;
+            $payment->payment_status = 'success';
+            if (isset($data->transaction_ref)) {
+                $payment->external_payment_id = $data->transaction_ref;
+            } elseif (isset($data->external_payment_id)) {
+                $payment->external_payment_id = $data->external_payment_id;
+            }
+            $payment->save();
+
+            // create gift card
+            $giftCard = GiftCard::create([
+                'code' => GiftCard::generateCode(),
+                'amount' => $payment->amount,
+                'balance' => $payment->amount,
+                'expiry_date' => null,
+                'status' => 'active',
+                'owner_id' => $payment->user_id,
+                'created_by' => null,
+            ]);
+
+            // create transaction log
+            GiftCardTransaction::create([
+                'gift_card_id' => $giftCard->id,
+                'user_id' => $payment->user_id,
+                'type' => 'purchase',
+                'amount' => $payment->amount,
+                'balance_before' => 0,
+                'balance_after' => $giftCard->balance,
+                'reference' => 'payment_' . $payment->id,
+            ]);
+
+            \DB::commit();
+
+            // Optional: try sending email but don't break flow on failure
+            try {
+                // Mail::to($payment->user->email)->send(new \App\Mail\GiftCardPurchased($giftCard));
+            } catch (\Exception $e) {
+                \Log::info('Gift card mail failed: '.$e->getMessage());
+            }
+
+            return true;
+        } catch (\Exception $e) {
+            \DB::rollBack();
+            \Log::error('giftcard_success error', ['err' => $e->getMessage(), 'data' => (array)$data]);
+            return false;
+        }
+    }
+}
+
+if (! function_exists('giftcard_failed')) {
+    function giftcard_failed($data)
+    {
+        try {
+            $payment = GiftCardPayment::find($data->attribute_id);
+            if (! $payment) {
+                \Log::warning('GiftCard payment not found in giftcard_failed', ['id' => $data->attribute_id]);
+                return false;
+            }
+
+            // mark failed (and set method/ref if available)
+            $payment->payment_status = 'failed';
+            $payment->payment_method = $data->payment_method ?? $payment->payment_method;
+            if (isset($data->transaction_ref)) {
+                $payment->external_payment_id = $data->transaction_ref;
+            }
+            $payment->save();
+
+            return true;
+        } catch (\Exception $e) {
+            \Log::error('giftcard_failed error', ['err' => $e->getMessage(), 'data' => (array)$data]);
+            return false;
+        }
+    }
+}
+

@@ -6,6 +6,7 @@ use App\Models\Order;
 use App\Models\DeliveryMan;
 use App\Exports\OrderExport;
 use App\Models\OrderPayment;
+use App\Models\ThirdPartyCompany;
 use Illuminate\Http\Request;
 use App\CentralLogics\Helpers;
 use App\CentralLogics\OrderLogic;
@@ -145,51 +146,161 @@ class OrderController extends Controller
         ]);
     }
 
-    public function details(Request $request,$id)
-    {
-        $data =0;
-        $restaurant =Helpers::get_restaurant_data();
-        if (($restaurant->restaurant_model == 'subscription' &&  $restaurant?->restaurant_sub?->self_delivery == 1)  || ($restaurant->restaurant_model == 'commission' &&  $restaurant->self_delivery_system == 1) ){
-        $data =1;
+    // public function details(Request $request,$id)
+    // {
+    //     $data =0;
+    //     $restaurant =Helpers::get_restaurant_data();
+    //     if (($restaurant->restaurant_model == 'subscription' &&  $restaurant?->restaurant_sub?->self_delivery == 1)  || ($restaurant->restaurant_model == 'commission' &&  $restaurant->self_delivery_system == 1) ){
+    //     $data =1;
+    //     }
+    //     $status = 'all';
+
+    //     $order = Order::with(['offline_payments','payments','subscription','subscription.schedule_today','details', 'customer'=>function($query){
+    //         return $query->withCount('orders');
+    //     },'delivery_man'=>function($query){
+    //         return $query->withCount('orders');
+    //     }])->where(['id' => $id, 'restaurant_id' => Helpers::get_restaurant_id()])
+
+    //     ->Notpos()
+    //     ->NotDigitalOrder()
+    //     ->when($status == 'all', function($query) use($data){
+    //         return $query->where(function($q1) use($data) {
+    //             $q1->whereNotIn('order_status',(config('order_confirmation_model') == 'restaurant'|| $data)?['failed','canceled', 'refund_requested', 'refunded']:['pending','failed','canceled', 'refund_requested', 'refunded'])
+    //             ->orWhere(function($q2){
+    //                 return $q2->where('order_status','pending')->whereIn('order_type', ['take_away','dine_in']);
+    //             })->orWhere(function($q3){
+    //                 return $q3->where('order_status','pending')->whereNotNull('subscription_id');
+    //             });
+    //         });
+    //     })
+
+    //     ->first();
+
+    //     if (isset($order)) {
+    //     $deliveryMen = DeliveryMan::with('last_location')->where('restaurant_id',Helpers::get_restaurant_id())->active()->get();
+    //     $deliveryMen = Helpers::deliverymen_list_formatting(data:$deliveryMen, restaurant_lat: $order?->restaurant?->latitude, restaurant_lng: $order?->restaurant?->longitude);
+
+    //     $selected_delivery_man = DeliveryMan::with('last_location')->where('id',$order->delivery_man_id)->first() ?? [];
+    //     if($order->delivery_man){
+    //         $selected_delivery_man = Helpers::deliverymen_list_formatting(data:$selected_delivery_man, restaurant_lat: $order?->restaurant?->latitude, restaurant_lng: $order?->restaurant?->longitude , single_data:true);
+    //     }
+
+    //         return view('vendor-views.order.order-view', compact('order', 'selected_delivery_man' , 'deliveryMen'));
+    //     } else {
+    //         Toastr::info('No more orders!');
+    //         return back();
+    //     }
+    // }
+    public function details(Request $request, $id)
+{
+    $data = 0;
+    $restaurant = Helpers::get_restaurant_data();
+
+    if (
+        ($restaurant->restaurant_model == 'subscription' && $restaurant?->restaurant_sub?->self_delivery == 1) ||
+        ($restaurant->restaurant_model == 'commission' && $restaurant->self_delivery_system == 1)
+    ) {
+        $data = 1;
+    }
+
+    $status = 'all';
+
+    $order = Order::with([
+        'offline_payments',
+        'payments',
+        'subscription',
+        'subscription.schedule_today',
+        'details',
+        'customer' => function ($query) {
+            return $query->withCount('orders');
+        },
+        'delivery_man' => function ($query) {
+            return $query->withCount('orders');
         }
-        $status = 'all';
-
-        $order = Order::with(['offline_payments','payments','subscription','subscription.schedule_today','details', 'customer'=>function($query){
-            return $query->withCount('orders');
-        },'delivery_man'=>function($query){
-            return $query->withCount('orders');
-        }])->where(['id' => $id, 'restaurant_id' => Helpers::get_restaurant_id()])
-
+    ])
+        ->where([
+            'id' => $id,
+            'restaurant_id' => Helpers::get_restaurant_id()
+        ])
         ->Notpos()
         ->NotDigitalOrder()
-        ->when($status == 'all', function($query) use($data){
-            return $query->where(function($q1) use($data) {
-                $q1->whereNotIn('order_status',(config('order_confirmation_model') == 'restaurant'|| $data)?['failed','canceled', 'refund_requested', 'refunded']:['pending','failed','canceled', 'refund_requested', 'refunded'])
-                ->orWhere(function($q2){
-                    return $q2->where('order_status','pending')->whereIn('order_type', ['take_away','dine_in']);
-                })->orWhere(function($q3){
-                    return $q3->where('order_status','pending')->whereNotNull('subscription_id');
-                });
+        ->when($status == 'all', function ($query) use ($data) {
+            return $query->where(function ($q1) use ($data) {
+                $q1->whereNotIn(
+                    'order_status',
+                    (config('order_confirmation_model') == 'restaurant' || $data)
+                        ? ['failed', 'canceled', 'refund_requested', 'refunded']
+                        : ['pending', 'failed', 'canceled', 'refund_requested', 'refunded']
+                )
+                    ->orWhere(function ($q2) {
+                        return $q2->where('order_status', 'pending')->whereIn('order_type', ['take_away', 'dine_in']);
+                    })
+                    ->orWhere(function ($q3) {
+                        return $q3->where('order_status', 'pending')->whereNotNull('subscription_id');
+                    });
             });
         })
-        // ->hasSubscriptionToday()
         ->first();
 
-        if (isset($order)) {
-        $deliveryMen = DeliveryMan::with('last_location')->where('restaurant_id',Helpers::get_restaurant_id())->active()->get();
-        $deliveryMen = Helpers::deliverymen_list_formatting(data:$deliveryMen, restaurant_lat: $order?->restaurant?->latitude, restaurant_lng: $order?->restaurant?->longitude);
+    if ($order) {
+        $deliveryMen = DeliveryMan::with('last_location')
+            ->where('restaurant_id', Helpers::get_restaurant_id())
+            ->active()->get();
 
-        $selected_delivery_man = DeliveryMan::with('last_location')->where('id',$order->delivery_man_id)->first() ?? [];
-        if($order->delivery_man){
-            $selected_delivery_man = Helpers::deliverymen_list_formatting(data:$selected_delivery_man, restaurant_lat: $order?->restaurant?->latitude, restaurant_lng: $order?->restaurant?->longitude , single_data:true);
+        $deliveryMen = collect(
+            Helpers::deliverymen_list_formatting(
+                data: $deliveryMen,
+                restaurant_lat: $order?->restaurant?->latitude,
+                restaurant_lng: $order?->restaurant?->longitude
+            )
+        );
+
+        $selected_delivery_man = DeliveryMan::with('last_location')->where('id', $order->delivery_man_id)->first() ?? [];
+
+        if ($order->delivery_man) {
+            $selected_delivery_man = Helpers::deliverymen_list_formatting(
+                data: $selected_delivery_man,
+                restaurant_lat: $order?->restaurant?->latitude,
+                restaurant_lng: $order?->restaurant?->longitude,
+                single_data: true
+            );
         }
 
-            return view('vendor-views.order.order-view', compact('order', 'selected_delivery_man' , 'deliveryMen'));
-        } else {
-            Toastr::info('No more orders!');
-            return back();
+        // ✅ 3rd Party Companies if no delivery men
+        $thirdPartyCompanies = [];
+        if ($deliveryMen->count() == 0) {
+            $thirdPartyCompanies = ThirdPartyCompany::where('status', 'active')->get();
         }
+
+        return view(
+            'vendor-views.order.order-view',
+            compact('order', 'selected_delivery_man', 'deliveryMen', 'thirdPartyCompanies')
+        );
+    } else {
+        Toastr::info('No more orders!');
+        return back();
     }
+}
+
+public function assignThirdParty(Request $request, $order_id)
+{
+    $order = Order::findOrFail($order_id);
+
+    // Prevent overwrite if already assigned
+    if ($order->delivery_man_id) {
+        return response()->json(['error' => translate('messages.order_already_assigned_to_inhouse')], 400);
+    }
+
+    $request->validate([
+        'company_id' => 'required|exists:third_party_companies,id'
+    ]);
+
+    $order->third_party_company_id = $request->company_id;
+    $order->save();
+
+    return response()->json(['success' => translate('messages.order_assigned_to_third_party')]);
+}
+
 
     public function status(Request $request)
     {

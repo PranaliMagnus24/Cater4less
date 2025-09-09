@@ -747,7 +747,7 @@ if($order->delivery_address){
                 </form>
                 @endif
 
-                @if (!in_array($order['order_type'],['dine_in','take_away']))
+                {{-- @if (!in_array($order['order_type'],['dine_in','take_away']))
                 <div class="card mb-2 mt-2">
                     <div class="card-header border-0 text-center pb-0">
                     @if ($order->delivery_man)
@@ -825,9 +825,7 @@ if($order->delivery_address){
                             @endif
                         @endif
                     @else
-
-
-                    @if (!$order->delivery_man && !in_array($order['order_status'], ['handover','delivered','take_away','refund_requested','canceled','refunded','refund_request_canceled']) && (isset($order->restaurant) && ($order->restaurant->restaurant_model == 'commission'  && $order->restaurant->self_delivery_system ) ||
+                    @if (!$order->delivery_man && !$order->third_party_company_id && !in_array($order['order_status'], ['handover','delivered','take_away','refund_requested','canceled','refunded','refund_request_canceled']) && (isset($order->restaurant) && ($order->restaurant->restaurant_model == 'commission'  && $order->restaurant->self_delivery_system ) ||
                      ($order->restaurant->restaurant_model == 'subscription' && isset($order->restaurant->restaurant_sub) && $order->restaurant->restaurant_sub->self_delivery == 1)))
                     <div class="w-100 text-center mr-2 mt-4 mb-4">
                         <button type="button" class="btn w-100 btn-primary font-regular" data-toggle="modal"
@@ -840,7 +838,140 @@ if($order->delivery_address){
                     @endif
                 </div>
             </div>
+                @endif --}}
+               @if (!in_array($order['order_type'],['dine_in','take_away']))
+    <div class="card mb-2 mt-2">
+        <div class="card-header border-0 text-center pb-0">
+            <h5 class="card-title mb-3 w-100 justify-content-between">
+                <div>
+                    <span class="card-header-icon">
+                        <i class="tio-user"></i>
+                    </span>
+                    <span>
+                        {{ $order->delivery_man ? translate('Delivery Man Information') : ($order->third_party_company_id ? translate('3rd Party Delivery Service Information') : translate('messages.assign_delivery_man')) }}
+                    </span>
+                </div>
+                {{-- Change option (for inhouse only) --}}
+                @if ($order->delivery_man &&
+                    !in_array($order['order_status'], ['handover','delivered','refund_requested','canceled','refunded','refund_request_canceled']) &&
+                    (
+                        ($order->restaurant->restaurant_model == 'commission' && $order->restaurant->self_delivery_system)
+                        ||
+                        ($order->restaurant->restaurant_model == 'subscription' && isset($order->restaurant->restaurant_sub) && $order->restaurant->restaurant_sub->self_delivery == 1)
+                    )
+                )
+                    <span class="ml-auto text--primary position-relative pl-2 cursor-pointer"
+                          data-toggle="modal" data-target="#myModal">
+                        {{ translate('messages.change') }}
+                    </span>
                 @endif
+            </h5>
+        </div>
+
+        <div class="card-body">
+            {{-- ✅ In-house Delivery Man Info --}}
+            @if ($order->delivery_man)
+                <div class="media align-items-center deco-none customer--information-single ml-3 border-0 text-center pb-0">
+                    <div class="avatar avatar-circle">
+                        <img class="avatar-img initial-81 onerror-image"
+                             data-onerror-image="{{ dynamicAsset('public/assets/admin/img/160x160/img3.jpg') }}"
+                             src="{{ $order->delivery_man?->image_full_url ?? dynamicAsset('public/assets/admin/img/160x160/img3.jpg') }}"
+                             alt="Delivery Man">
+                    </div>
+                    <div class="media-body">
+                        <span class="fz--14px text--title font-semibold d-block">
+                            {{ $order->delivery_man->f_name . ' ' . $order->delivery_man->l_name }}
+                        </span>
+                        <span class="d-block">
+                            <strong class="text--title font-semibold">
+                                {{ $order->delivery_man->orders_count }}
+                            </strong>
+                            {{ translate('messages.orders') }}
+                        </span>
+                        <span class="d-block">
+                            <strong>Email: </strong> {{ $order->delivery_man->email }}
+                        </span>
+                        <span class="d-block">
+                            <strong>Phone: </strong>
+                            <a href="tel:{{ $order->delivery_man->phone }}">{{ $order->delivery_man->phone }}</a>
+                        </span>
+                    </div>
+                </div>
+
+                {{-- Last location --}}
+                @php($address = $order->dm_last_location)
+                <hr>
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5>{{ translate('messages.last_location') }}</h5>
+                </div>
+                @if ($address)
+                    <span class="d-block mb-2">
+                        <a target="_blank"
+                           href="http://maps.google.com/maps?z=12&t=m&q=loc:{{ $address['latitude'] }}+{{ $address['longitude'] }}">
+                            <i class="tio-poi"></i> {{ $address['location'] }}
+                        </a>
+                    </span>
+                @else
+                    <span class="d-block text-lowercase qcont mb-2">
+                        {{ translate('messages.location_not_found') }}
+                    </span>
+                @endif
+
+            {{-- ✅ 3rd Party Company Info --}}
+            @elseif($order->third_party_company_id)
+                @php($company = \App\Models\ThirdPartyCompany::find($order->third_party_company_id))
+                @if($company)
+                    <div class="media align-items-center deco-none customer--information-single ml-3 border-0 text-center pb-0">
+                        <div class="avatar avatar-circle">
+                           <img class="upload-icon initial-26"
+                             src="{{ $company->image_full_url ?? dynamicAsset('public/assets/admin/img/company.png') }}"
+                             alt="{{ $company->company_name }}">
+                        </div>
+                        <div class="media-body">
+                            <span class="fz--14px text--title font-semibold d-block">
+                                {{ $company->company_name }}
+                            </span>
+                            <span class="d-block text-muted">
+                                {{ $company->company_type }}
+                            </span>
+                            @if ($company->email)
+                                <span class="d-block"><strong>Email: </strong> {{ $company->email }}</span>
+                            @endif
+                            @if ($company->contact_number)
+                                <span class="d-block">
+                                    <strong>Phone: </strong>
+                                    <a href="tel:{{ $company->contact_number }}">{{ $company->contact_number }}</a>
+                                </span>
+                            @endif
+                        </div>
+                    </div>
+                @endif
+
+            {{-- ✅ Assign Button --}}
+            @else
+                @if (
+                    !$order->delivery_man && !$order->third_party_company_id &&
+                    !in_array($order['order_status'], ['handover','delivered','take_away','refund_requested','canceled','refunded','refund_request_canceled']) &&
+                    (
+                        ($order->restaurant->restaurant_model == 'commission' && $order->restaurant->self_delivery_system)
+                        ||
+                        ($order->restaurant->restaurant_model == 'subscription' && isset($order->restaurant->restaurant_sub) && $order->restaurant->restaurant_sub->self_delivery == 1)
+                    )
+                )
+                    <div class="w-100 text-center mr-2 mt-4 mb-4">
+                        <button type="button" class="btn w-100 btn-primary font-regular"
+                                data-toggle="modal" data-target="#myModal">
+                            <i class="tio-bike"></i> {{ translate('messages.assign_delivery_man') }}
+                        </button>
+                    </div>
+                @endif
+            @endif
+        </div>
+    </div>
+@endif
+
+
+
 
 
                 @if ($order->order_type != 'dine_in')
@@ -1251,6 +1382,37 @@ if($order->delivery_address){
                                         </li>
                                     @endif
                                 @endforeach
+                                <!----3d party companies---->
+                                @if($deliveryMen->count() == 0)
+                                <div class="text-center my-3">
+                                    <img src="{{ dynamicAsset('public/assets/admin/img/dmimage.png') }}" alt="image">
+                                    <p class="text-muted">{{ translate('Currently_no_deliveryman_available.') }}</p>
+                                </div>
+                                @if($thirdPartyCompanies->count() > 0)
+                                <h5 class="mt-3">{{ translate('messages.Available_3rd_Party_Delivery_Services') }}</h5>
+                                <ul class="list-group">
+                                    @foreach($thirdPartyCompanies as $company)
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div class="d-flex gap-2 align-items-center">
+                                            <img src="{{ $company->image_full_url ?? dynamicAsset('public/assets/admin/img/company.png') }}"
+                                            class="avatar avatar-60 rounded-10" alt="Company Logo">
+                                        <div>
+                                            <h6 class="mb-1">{{ $company->company_name }}</h6>
+                                            <small>{{ $company->company_type }}</small>
+                                        </div>
+                                    </div>
+                                    <a href="javascript:void(0)"
+                                    class="btn btn-sm btn-outline-primary assign-third-party"
+                                    data-id="{{ $company->id }}">
+                                    {{ translate('messages.Request_Delivery') }}
+                                    </a>
+                                </li>
+                                @endforeach
+                            </ul>
+                            @else
+                            <p class="text-muted">{{ translate('messages.No_third_party_available') }}</p>
+                            @endif
+                            @endif
                             </ul>
                         </div>
                         <div class="col-md-7 modal_body_map">
@@ -1687,6 +1849,32 @@ src="https://maps.googleapis.com/maps/api/js?key={{ \App\Models\BusinessSetting:
                 }
             });
         });
+
+       $(document).on('click', '.assign-third-party', function () {
+    let companyId = $(this).data('id');
+    let orderId = "{{ $order->id }}";
+
+    let url = "{{ route('vendor.order.assign-third-party', ['order_id' => '__orderId__']) }}";
+    url = url.replace('__orderId__', orderId);
+
+    $.ajax({
+        url: url,
+        method: "POST",
+        data: {
+            _token: "{{ csrf_token() }}",
+            company_id: companyId
+        },
+        success: function (res) {
+            toastr.success(res.success);
+            location.reload();
+        },
+        error: function (err) {
+            toastr.error(err.responseJSON.error ?? 'Something went wrong');
+        }
+    });
+});
+
+
     </script>
 
 

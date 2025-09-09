@@ -204,6 +204,7 @@ Route::group(['namespace' => 'Vendor', 'as' => 'vendor.'], function () {
             Route::get('orders-export/{status}', 'OrderController@orders_export')->name('export');
             Route::post('add-order-proof/{id}', 'OrderController@add_order_proof')->name('add-order-proof');
             Route::get('remove-proof-image', 'OrderController@remove_proof_image')->name('remove-proof-image');
+            Route::post('assign-third-party/{order_id}', 'OrderController@assignThirdParty')->name('assign-third-party');
 
 
             Route::group([ 'as' => 'subscription.'], function () {
@@ -260,6 +261,16 @@ Route::group(['namespace' => 'Vendor', 'as' => 'vendor.'], function () {
             Route::get('view/{conversation_id}/{user_id}', 'ConversationController@view')->name('view');
         });
 
+         /////Promotion controller
+      Route::group([
+    'prefix' => 'restaurant/promotion',
+    'as' => 'restaurant.promotion.',
+    'middleware' => ['vendor'] // ensures vendor is logged in
+], function () {
+    Route::get('settings', 'PromotionController@index')->name('index');
+    Route::post('update', 'PromotionController@update')->name('update');
+});
+
         Route::group(['prefix' => 'subscription' , 'as' => 'subscriptionackage.'], function () {
             Route::get('/subscriber-detail',  [SubscriptionController::class, 'subscriberDetail'])->name('subscriberDetail');
             Route::get('/invoice/{id}',  [SubscriptionController::class, 'invoice'])->name('invoice');
@@ -273,6 +284,9 @@ Route::group(['namespace' => 'Vendor', 'as' => 'vendor.'], function () {
             Route::post('/package-buy',  [SubscriptionController::class, 'packageBuy'])->name('packageBuy');
             Route::post('/add-to-session',  [SubscriptionController::class, 'addToSession'])->name('addToSession');
         });
+
+
+
 
 
         Route::group(['prefix' => 'report', 'as' => 'report.', 'middleware' => ['module:report' ,'subscription:report']], function () {

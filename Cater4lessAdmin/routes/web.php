@@ -233,14 +233,22 @@ Route::group(['prefix' => 'deliveryman', 'as' => 'deliveryman.'], function () {
 
 
 ////Admin Gift Card Routes
+// Route::prefix('admin')->name('admin.')->group(function () {
+//     Route::resource('gift_cards', GiftCardController::class);
+
+//     Route::post('gift_cards/status/{id}', [GiftCardController::class, 'status'])
+//         ->name('gift_cards.status');
+//     Route::get('gift-cards/export/{type}', [GiftCardController::class, 'export'])->name('gift_cards.export');
+
+// });
+// routes/web.php
 Route::prefix('admin')->name('admin.')->group(function () {
-    Route::resource('gift_cards', GiftCardController::class);
+    Route::resource('gift_cards', GiftCardController::class)->except(['show']);
 
-    Route::post('gift_cards/status/{id}', [GiftCardController::class, 'status'])
-        ->name('gift_cards.status');
+    Route::post('gift_cards/status/{id}', [GiftCardController::class, 'status'])->name('gift_cards.status');
     Route::get('gift-cards/export/{type}', [GiftCardController::class, 'export'])->name('gift_cards.export');
-
 });
+
 
 
 

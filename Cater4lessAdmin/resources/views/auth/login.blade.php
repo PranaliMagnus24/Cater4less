@@ -52,7 +52,7 @@
                     data-onerror-image="{{ dynamicAsset('/public/assets/admin/img/auth-fav.png') }}" alt="image">
                 </a>
                 <div class="text-center">
-                    <div class="auth-header mb-5">
+                    <div class="auth-header mt-6">
                         <h2 class="signin-txt">{{ translate('messages.Signin_To_Your_Panel')}}</h2>
                     </div>
                 </div>

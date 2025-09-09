@@ -10,7 +10,7 @@ class ThirdPartyCompany extends Model
 {
     use HasFactory;
     protected $table = 'third_party_companies';
-    protected $fillable = ['company_name','company_email','company_phone','company_address','status','image'];
+    protected $fillable = ['company_name','company_email','company_phone','company_address','status','image','company_documents','company_type'];
      protected $appends = ['image_full_url'];
      public function getImageFullUrlAttribute()
 {
@@ -22,6 +22,17 @@ class ThirdPartyCompany extends Model
 
     return Helpers::get_full_url('company', $value, 'public');
 }
+
+// App\Models\ThirdPartyCompany.php
+protected $casts = [
+    'company_documents' => 'string',
+];
+
+public function getCompanyDocumentsArrayAttribute()
+{
+    return $this->company_documents ? explode(',', $this->company_documents) : [];
+}
+
 
 
 }

@@ -5,6 +5,7 @@ namespace App\Console;
 use App\Models\BusinessSetting;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use App\Console\Commands\ExpireSharedGiftCards;
 
 class Kernel extends ConsoleKernel
 {
@@ -25,7 +26,8 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-
+        $schedule->command(ExpireSharedGiftCards::class)->everyTenMinutes();
+        $schedule->command('badges:update')->daily();
     }
 
     /**

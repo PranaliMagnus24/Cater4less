@@ -29,14 +29,15 @@
                 <div class="card">
                     <div class="card-header py-2 border-0">
                         <div class="search--button-wrapper">
-                            <form>
-                                <div class="input--group input-group input-group-merge input-group-flush">
-                                    <input id="datatableSearch" type="search" name="search"
-                                        value="{{ request()?->search ?? null }}" class="form-control"
-                                        placeholder="{{ translate('Ex_:_Search_by_title...') }}" aria-label="Search here">
-                                    <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
-                                </div>
-                            </form>
+                            <form method="GET" action="{{ route('admin.gift_cards.index') }}">
+    <div class="input--group input-group input-group-merge input-group-flush">
+        <input id="datatableSearch" type="search" name="search"
+            value="{{ $search ?? '' }}" class="form-control"
+            placeholder="{{ translate('Ex_:_Search_by_title_or_code...') }}" aria-label="Search here">
+        <button type="submit" class="btn btn--secondary"><i class="tio-search"></i></button>
+    </div>
+</form>
+
                             <div class="hs-unfold mr-2">
                                 <a class="js-hs-unfold-invoker btn btn-sm btn-white dropdown-toggle min-height-40"
                                     href="javascript:"
@@ -77,6 +78,7 @@
                             <thead class="thead-light">
                                 <tr>
                                     <th>{{ translate('messages.sl') }}</th>
+                                    <th>{{ translate('messages.image') }}</th>
                                     <th>{{ translate('messages.code') }}</th>
                                     <th>{{ translate('messages.amount') }}</th>
                                     <th>{{ translate('messages.balance') }}</th>
@@ -90,9 +92,16 @@
                                 @foreach ($giftCards as $key => $giftcard)
                                     <tr>
                                         <td>{{ $key + $giftCards->firstItem() }}</td>
+                                         <td>
+                <img src="{{ $giftcard->image_full_url }}"
+                     alt="Gift Card"
+                     class="avatar avatar-md rounded"
+                     style="width: 60px; height: auto; object-fit: cover;">
+            </td>
                                         <td>
                                             <span class="d-block text-body">{{ $giftcard->code }}</span>
                                         </td>
+
                                         <td>$ {{ number_format($giftcard->amount, 2) }}</td>
                                         <td>
                                             $ {{ number_format($giftcard->balance, 2) }}
@@ -143,7 +152,7 @@
                         <div class="page-area px-4 pb-3">
                             <div class="d-flex align-items-center justify-content-end">
                                 <div>
-                                    {!! $giftCards->links() !!}
+                                    {!! $giftCards->appends(request()->query())->links() !!}
                                 </div>
                             </div>
                         </div>
@@ -205,6 +214,23 @@
                     }
                 });
             });
+
+            $(document).on('keyup', '#datatableSearch', function() {
+                let search = $(this).val();
+                $.ajax({
+                    url: "{{ route('admin.gift_cards.index') }}",
+                    type: "GET",
+                    data: { search: search },
+                    success: function(response) {
+                        let tableBody = $(response).find('#set-rows').html();
+                        $('#set-rows').html(tableBody);
+                        let pagination = $(response).find('.page-area').html();
+                        $('.page-area').html(pagination);
+                        $('#itemCount').text($(response).find('#itemCount').text());
+                    }
+                });
+            });
+
         </script>
     @endpush
 @endsection

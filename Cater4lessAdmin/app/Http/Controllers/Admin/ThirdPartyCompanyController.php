@@ -19,6 +19,39 @@ class ThirdPartyCompanyController extends Controller
         return view('admin-views.third-party-company.index');
     }
 
+    // public function store(Request $request)
+    // {
+    //     $validator = Validator::make($request->all(), [
+    //         'company_name' => 'required|string|max:191',
+    //         'company_email' => 'required|email|max:191|unique:third_party_companies,company_email',
+    //         'company_phone' => 'required|string|max:20|unique:third_party_companies,company_phone',
+    //         'company_address' => 'required|string|max:500',
+    //         'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+    //         'company_documents.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+    //     ]);
+
+    //     if ($validator->fails()) {
+    //         return response()->json(['errors' => Helpers::error_processor($validator)]);
+    //     }
+
+    //     $company = new ThirdPartyCompany();
+    //     $company->company_name = $request->company_name;
+    //     $company->company_email = $request->company_email;
+    //     $company->company_phone = $request->company_phone;
+    //     $company->company_address = $request->company_address;
+
+    //     if ($request->hasFile('image')) {
+    //         $company->image = Helpers::upload(dir: 'company/', format: 'png', image: $request->file('image'));
+    //     }
+
+    //     $company->save();
+
+    //     return response()->json([
+    //         'success' => 1,
+    //         'message' => translate('messages.company_added_successfully'),
+    //         'id' => $company->id
+    //     ]);
+    // }
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -26,7 +59,9 @@ class ThirdPartyCompanyController extends Controller
             'company_email' => 'required|email|max:191|unique:third_party_companies,company_email',
             'company_phone' => 'required|string|max:20|unique:third_party_companies,company_phone',
             'company_address' => 'required|string|max:500',
+            'company_type' => 'required|string|max:100',
             'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'company_documents.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
         if ($validator->fails()) {
@@ -38,10 +73,22 @@ class ThirdPartyCompanyController extends Controller
         $company->company_email = $request->company_email;
         $company->company_phone = $request->company_phone;
         $company->company_address = $request->company_address;
+        $company->company_type = $request->company_type;
 
+        // Save logo
         if ($request->hasFile('image')) {
             $company->image = Helpers::upload(dir: 'company/', format: 'png', image: $request->file('image'));
         }
+
+        // Save multiple documents
+        $documents = [];
+        if ($request->hasFile('company_documents')) {
+            foreach ($request->file('company_documents') as $doc) {
+                $path = Helpers::upload(dir: 'company/documents/', format: 'png', image: $doc);
+                $documents[] = $path;
+            }
+        }
+        $company->company_documents = implode(',', $documents); // storing as comma separated string in VARCHAR
 
         $company->save();
 
@@ -51,6 +98,7 @@ class ThirdPartyCompanyController extends Controller
             'id' => $company->id
         ]);
     }
+
 
     public function list(Request $request)
     {
@@ -91,48 +139,116 @@ class ThirdPartyCompanyController extends Controller
         return view('admin-views.third-party-company.edit', compact('company'));
     }
 
+    // public function update(Request $request, $id)
+    // {
+    //     $company = ThirdPartyCompany::findOrFail($id);
+
+    //     // Validation
+    //     $request->validate([
+    //         'company_name' => 'required|string|max:255',
+    //         'company_email' => 'required|email',
+    //         'company_phone' => 'required|string|max:20',
+    //         'company_address' => 'nullable|string|max:255',
+    //         'image' => 'nullable|mimes:jpg,jpeg,png,gif|max:2048',
+    //     ]);
+
+    //     // Update Basic Fields
+    //     $company->company_name = $request->company_name;
+    //     $company->company_email = $request->company_email;
+    //     $company->company_phone = $request->company_phone;
+    //     $company->company_address = $request->company_address;
+
+    //     // Handle Image Upload
+    //     if ($request->hasFile('image')) {
+    //         // Old delete
+    //         if ($company->image) {
+    //             Helpers::check_and_delete('company/', $company->image);
+    //         }
+    //         // New upload
+    //         $imageName = Helpers::upload('company/', 'png', $request->file('image'));
+    //         $company->image = $imageName;
+    //     }
+
+    //     $company->save();
+
+    //     if ($request->ajax()) {
+    //         return response()->json([
+    //             'success' => true,
+    //             'message' => translate('messages.company_updated_successfully')
+    //         ]);
+    //     }
+
+    //     Toastr::success(translate('messages.company_updated_successfully'));
+    //     return redirect()->route('admin.third-party-company.list');
+    // }
     public function update(Request $request, $id)
     {
         $company = ThirdPartyCompany::findOrFail($id);
 
-        // ✅ Validation
-        $request->validate([
-            'company_name' => 'required|string|max:255',
-            'company_email' => 'required|email',
-            'company_phone' => 'required|string|max:20',
-            'company_address' => 'nullable|string|max:255',
-            'image' => 'nullable|mimes:jpg,jpeg,png,gif|max:2048',
+        //Validation
+        $validator = Validator::make($request->all(), [
+            'company_name' => 'required|string|max:191',
+            'company_email' => 'required|email|max:191|unique:third_party_companies,company_email,' . $company->id,
+            'company_phone' => 'required|string|max:20|unique:third_party_companies,company_phone,' . $company->id,
+            'company_address' => 'required|string|max:500',
+            'company_type' => 'required|string|max:100',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
+            'company_documents.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048',
         ]);
 
-        // ✅ Update Basic Fields
+        if ($validator->fails()) {
+            return response()->json(['errors' => Helpers::error_processor($validator)]);
+        }
+
+        //Update Basic Fields
         $company->company_name = $request->company_name;
         $company->company_email = $request->company_email;
         $company->company_phone = $request->company_phone;
         $company->company_address = $request->company_address;
+        $company->company_type = $request->company_type;
 
-        // ✅ Handle Image Upload
+        //Handle Logo Upload
         if ($request->hasFile('image')) {
-            // Old delete
             if ($company->image) {
                 Helpers::check_and_delete('company/', $company->image);
             }
-            // New upload
-            $imageName = Helpers::upload('company/', 'png', $request->file('image'));
-            $company->image = $imageName;
+            $company->image = Helpers::upload('company/', 'png', $request->file('image'));
         }
+
+        //Handle Documents
+        $existingDocs = $company->company_documents ? explode(',', $company->company_documents) : [];
+
+        // 1. Remove selected docs
+        if ($request->has('remove_documents')) {
+            foreach ($request->remove_documents as $removeDoc) {
+                if (($key = array_search($removeDoc, $existingDocs)) !== false) {
+                    // delete from storage
+                    Helpers::check_and_delete('company/documents/', $removeDoc);
+                    unset($existingDocs[$key]);
+                }
+            }
+        }
+
+        // 2. Add new uploaded docs
+        if ($request->hasFile('company_documents')) {
+            foreach ($request->file('company_documents') as $doc) {
+                $path = Helpers::upload('company/documents/', 'png', $doc);
+                $existingDocs[] = $path;
+            }
+        }
+
+        // 3. Save final docs list
+        $company->company_documents = implode(',', $existingDocs);
 
         $company->save();
 
-        if ($request->ajax()) {
-            return response()->json([
-                'success' => true,
-                'message' => translate('messages.company_updated_successfully')
-            ]);
-        }
-
-        Toastr::success(translate('messages.company_updated_successfully'));
-        return redirect()->route('admin.third-party-company.list');
+        return response()->json([
+            'success' => 1,
+            'message' => translate('messages.company_updated_successfully')
+        ]);
     }
+
+
 
     public function delete(Request $request)
     {

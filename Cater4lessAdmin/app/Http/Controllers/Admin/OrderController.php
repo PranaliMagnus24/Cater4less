@@ -35,6 +35,7 @@ use Illuminate\Support\Facades\Mail;
 use Maatwebsite\Excel\Facades\Excel;
 use App\Exports\RestaurantOrderlistExport;
 use MatanYadaev\EloquentSpatial\Objects\Point;
+use App\Models\ThirdPartyCompany;
 
 class OrderController extends Controller
 {
@@ -554,78 +555,220 @@ class OrderController extends Controller
 
 
 
-    public function details(Request $request, $id)
-    {
-        $order = Order::with(['offline_payments','payments','subscription','subscription.schedule_today','details', 'refund','restaurant' => function ($query) {
+    // public function details(Request $request, $id)
+    // {
+    //     $order = Order::with(['offline_payments','payments','subscription','subscription.schedule_today','details', 'refund','restaurant' => function ($query) {
+    //         return $query->withCount('orders');
+    //     }, 'customer' => function ($query) {
+    //         return $query->withCount('orders');
+    //     }, 'delivery_man' => function ($query) {
+    //         return $query->withCount('orders');
+    //     }, 'details.food' => function ($query) {
+    //         return $query->withoutGlobalScope(RestaurantScope::class);
+    //     }, 'details.campaign' => function ($query) {
+    //         return $query->withoutGlobalScope(RestaurantScope::class);
+    //     }])->where(['id' => $id])->Notpos()->first();
+    //     if (isset($order)) {
+    //         if (($order?->restaurant?->self_delivery_system && $order?->restaurant?->restaurant_model == 'commission') ||
+    //         ($order?->restaurant?->restaurant_model == 'subscription' &&   $order?->restaurant?->restaurant_sub?->self_delivery == 1)  ) {
+    //             $deliveryMen = DeliveryMan::with('last_location')->where('restaurant_id', $order->restaurant_id)->available()->active()->get();
+
+    //         } else {
+    //             if($order->restaurant !== null){
+    //                 $deliveryMen = DeliveryMan::with('last_location')->where('zone_id', $order->restaurant->zone_id)->where(function($query)use($order){
+    //                         $query->where('vehicle_id',$order->vehicle_id)->orWhereNull('vehicle_id');
+    //                 })
+    //                 ->available()->active()->get();
+    //             } else{
+    //                 $deliveryMen = DeliveryMan::with(['last_location', 'wallet'])->where('zone_id', '=', NULL)->where('vehicle_id',$order->vehicle_id)->active()->get();
+    //             }
+    //         }
+
+    //         $category = $request->query('category_id', 0);
+
+    //         $categories = Category::active()->get();
+    //         $keyword = $request->query('keyword', false);
+    //         $key = explode(' ', $keyword);
+    //         $products = Food::withoutGlobalScope(RestaurantScope::class)->where('restaurant_id', $order->restaurant_id)
+    //             ->when($category, function ($query) use ($category) {
+    //                 $query->whereHas('category', function ($q) use ($category) {
+    //                     return $q->whereId($category)->orWhere('parent_id', $category);
+    //                 });
+    //             })
+    //             ->when($keyword, function ($query) use ($key) {
+    //                 return $query->where(function ($q) use ($key) {
+    //                     foreach ($key as $value) {
+    //                         $q->orWhere('name', 'like', "%{$value}%");
+    //                     }
+    //                 });
+    //             })
+    //             ->latest()->paginate(10);
+    //         $editing = false;
+    //         if ($request->session()->has('order_cart')) {
+    //             $cart = session()->get('order_cart');
+    //             if (count($cart) > 0 && $cart[0]->order_id == $order->id) {
+    //                 $editing = true;
+    //             } else {
+    //                 session()->forget('order_cart');
+    //             }
+    //         }
+
+    //         $deliveryMen = Helpers::deliverymen_list_formatting(data:$deliveryMen, restaurant_lat: $order?->restaurant?->latitude, restaurant_lng: $order?->restaurant?->longitude);
+
+
+    //         $selected_delivery_man = DeliveryMan::with('last_location')->where('id',$order->delivery_man_id)->first() ?? [];
+    //         if($order->delivery_man){
+    //             $selected_delivery_man = Helpers::deliverymen_list_formatting(data:$selected_delivery_man, restaurant_lat: $order?->restaurant?->latitude, restaurant_lng: $order?->restaurant?->longitude , single_data:true);
+    //         }
+
+    //         return view('admin-views.order.order-view', compact('order', 'deliveryMen', 'categories', 'products', 'category', 'keyword', 'editing', 'selected_delivery_man'));
+    //     } else {
+    //         Toastr::info(translate('messages.no_more_orders'));
+    //         return back();
+    //     }
+    // }
+  public function details(Request $request, $id)
+{
+    $order = Order::with([
+        'offline_payments',
+        'payments',
+        'subscription',
+        'subscription.schedule_today',
+        'details',
+        'refund',
+        'restaurant' => function ($query) {
             return $query->withCount('orders');
-        }, 'customer' => function ($query) {
+        },
+        'customer' => function ($query) {
             return $query->withCount('orders');
-        }, 'delivery_man' => function ($query) {
+        },
+        'delivery_man' => function ($query) {
             return $query->withCount('orders');
-        }, 'details.food' => function ($query) {
+        },
+        'details.food' => function ($query) {
             return $query->withoutGlobalScope(RestaurantScope::class);
-        }, 'details.campaign' => function ($query) {
+        },
+        'details.campaign' => function ($query) {
             return $query->withoutGlobalScope(RestaurantScope::class);
-        }])->where(['id' => $id])->Notpos()->first();
-        if (isset($order)) {
-            if (($order?->restaurant?->self_delivery_system && $order?->restaurant?->restaurant_model == 'commission') ||
-            ($order?->restaurant?->restaurant_model == 'subscription' &&   $order?->restaurant?->restaurant_sub?->self_delivery == 1)  ) {
-                $deliveryMen = DeliveryMan::with('last_location')->where('restaurant_id', $order->restaurant_id)->available()->active()->get();
+        }
+    ])->where(['id' => $id])->Notpos()->first();
 
-            } else {
-                if($order->restaurant !== null){
-                    $deliveryMen = DeliveryMan::with('last_location')->where('zone_id', $order->restaurant->zone_id)->where(function($query)use($order){
-                            $query->where('vehicle_id',$order->vehicle_id)->orWhereNull('vehicle_id');
-                    })
-                    ->available()->active()->get();
-                } else{
-                    $deliveryMen = DeliveryMan::with(['last_location', 'wallet'])->where('zone_id', '=', NULL)->where('vehicle_id',$order->vehicle_id)->active()->get();
-                }
-            }
+    if (!$order) {
+        Toastr::info(translate('messages.no_more_orders'));
+        return back();
+    }
 
-            $category = $request->query('category_id', 0);
-            // $sub_category = $request->query('sub_category', 0);
-            $categories = Category::active()->get();
-            $keyword = $request->query('keyword', false);
-            $key = explode(' ', $keyword);
-            $products = Food::withoutGlobalScope(RestaurantScope::class)->where('restaurant_id', $order->restaurant_id)
-                ->when($category, function ($query) use ($category) {
-                    $query->whereHas('category', function ($q) use ($category) {
-                        return $q->whereId($category)->orWhere('parent_id', $category);
-                    });
+    // ✅ Delivery man fetching logic
+    if (
+        ($order?->restaurant?->self_delivery_system && $order?->restaurant?->restaurant_model == 'commission') ||
+        ($order?->restaurant?->restaurant_model == 'subscription' && $order?->restaurant?->restaurant_sub?->self_delivery == 1)
+    ) {
+        $deliveryMen = DeliveryMan::with('last_location')
+            ->where('restaurant_id', $order->restaurant_id)
+            ->available()->active()->get();
+    } else {
+        if ($order->restaurant !== null) {
+            $deliveryMen = DeliveryMan::with('last_location')
+                ->where('zone_id', $order->restaurant->zone_id)
+                ->where(function ($query) use ($order) {
+                    $query->where('vehicle_id', $order->vehicle_id)->orWhereNull('vehicle_id');
                 })
-                ->when($keyword, function ($query) use ($key) {
-                    return $query->where(function ($q) use ($key) {
-                        foreach ($key as $value) {
-                            $q->orWhere('name', 'like', "%{$value}%");
-                        }
-                    });
-                })
-                ->latest()->paginate(10);
-            $editing = false;
-            if ($request->session()->has('order_cart')) {
-                $cart = session()->get('order_cart');
-                if (count($cart) > 0 && $cart[0]->order_id == $order->id) {
-                    $editing = true;
-                } else {
-                    session()->forget('order_cart');
-                }
-            }
-
-            $deliveryMen = Helpers::deliverymen_list_formatting(data:$deliveryMen, restaurant_lat: $order?->restaurant?->latitude, restaurant_lng: $order?->restaurant?->longitude);
-
-
-            $selected_delivery_man = DeliveryMan::with('last_location')->where('id',$order->delivery_man_id)->first() ?? [];
-            if($order->delivery_man){
-                $selected_delivery_man = Helpers::deliverymen_list_formatting(data:$selected_delivery_man, restaurant_lat: $order?->restaurant?->latitude, restaurant_lng: $order?->restaurant?->longitude , single_data:true);
-            }
-
-            return view('admin-views.order.order-view', compact('order', 'deliveryMen', 'categories', 'products', 'category', 'keyword', 'editing', 'selected_delivery_man'));
+                ->available()->active()->get();
         } else {
-            Toastr::info(translate('messages.no_more_orders'));
-            return back();
+            $deliveryMen = DeliveryMan::with(['last_location', 'wallet'])
+                ->whereNull('zone_id')
+                ->where('vehicle_id', $order->vehicle_id)
+                ->active()->get();
         }
     }
+
+    // ✅ If no delivery man, load 3rd party companies
+    $thirdPartyCompanies = [];
+    if ($deliveryMen->count() == 0) {
+        $thirdPartyCompanies = ThirdPartyCompany::where('status', 'active')->get();
+    }
+
+    $category = $request->query('category_id', 0);
+    $categories = Category::active()->get();
+    $keyword = $request->query('keyword', false);
+    $key = explode(' ', $keyword);
+
+    $products = Food::withoutGlobalScope(RestaurantScope::class)
+        ->where('restaurant_id', $order->restaurant_id)
+        ->when($category, function ($query) use ($category) {
+            $query->whereHas('category', function ($q) use ($category) {
+                return $q->whereId($category)->orWhere('parent_id', $category);
+            });
+        })
+        ->when($keyword, function ($query) use ($key) {
+            return $query->where(function ($q) use ($key) {
+                foreach ($key as $value) {
+                    $q->orWhere('name', 'like', "%{$value}%");
+                }
+            });
+        })
+        ->latest()->paginate(10);
+
+    $editing = false;
+    if ($request->session()->has('order_cart')) {
+        $cart = session()->get('order_cart');
+        if (count($cart) > 0 && $cart[0]->order_id == $order->id) {
+            $editing = true;
+        } else {
+            session()->forget('order_cart');
+        }
+    }
+
+    $deliveryMen = Helpers::deliverymen_list_formatting(
+        data: $deliveryMen,
+        restaurant_lat: $order?->restaurant?->latitude,
+        restaurant_lng: $order?->restaurant?->longitude
+    );
+
+    $selected_delivery_man = DeliveryMan::with('last_location')->where('id', $order->delivery_man_id)->first() ?? [];
+    if ($order->delivery_man) {
+        $selected_delivery_man = Helpers::deliverymen_list_formatting(
+            data: $selected_delivery_man,
+            restaurant_lat: $order?->restaurant?->latitude,
+            restaurant_lng: $order?->restaurant?->longitude,
+            single_data: true
+        );
+    }
+
+    return view('admin-views.order.order-view', compact(
+        'order',
+        'deliveryMen',
+        'categories',
+        'products',
+        'category',
+        'keyword',
+        'editing',
+        'selected_delivery_man',
+        'thirdPartyCompanies' // ✅ pass to view
+    ));
+}
+
+
+
+    public function assignThirdParty(Request $request, $order_id)
+{
+    $order = Order::findOrFail($order_id);
+
+    if ($order->delivery_man_id) {
+        return response()->json(['error' => translate('messages.order_already_assigned_to_inhouse')], 400);
+    }
+
+    $request->validate([
+        'company_id' => 'required|exists:third_party_companies,id'
+    ]);
+
+    $order->third_party_company_id = $request->company_id;
+    $order->save();
+
+    return response()->json(['success' => translate('messages.order_assigned_to_third_party')]);
+}
+
+
 
     public function search(Request $request)
     {

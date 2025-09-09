@@ -28,13 +28,13 @@
                 <div class="row">
                     <div class="col-sm-6">
                         <div class="form-group">
-                            <label class="input-label">{{ translate('messages.amount') }} (₹)</label>
+                            <label class="input-label">{{ translate('messages.amount') }} ($)</label>
                             <input type="number" step="0.01" name="amount" value="{{ old('amount') }}" class="form-control h--45px" required>
                             @error('amount') <span class="text-danger">{{ $message }}</span> @enderror
                         </div>
 
                         <div class="form-group">
-                            <label class="input-label">{{ translate('messages.balance') }} (₹)</label>
+                            <label class="input-label">{{ translate('messages.balance') }} ($)</label>
                             <input type="number" step="0.01" name="balance" value="{{ old('balance') }}" class="form-control h--45px" required>
                             @error('balance') <span class="text-danger">{{ $message }}</span> @enderror
                         </div>

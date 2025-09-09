@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\CentralLogics\Helpers;
+use App\Models\BadgeCashback;
 use App\Models\Vendor;
 use App\Scopes\ZoneScope;
 use Illuminate\Support\Facades\DB;
@@ -60,9 +61,10 @@ class Restaurant extends Model
         'reviews_comments_count'=>'integer',
         'package_id'=>'integer',
         'distance' => 'float',
+
     ];
 
-    protected $appends = ['gst_status','gst_code','free_delivery_distance_status','free_delivery_distance_value','logo_full_url','cover_photo_full_url','meta_image_full_url'];
+    protected $appends = ['gst_status','gst_code','free_delivery_distance_status','free_delivery_distance_value','logo_full_url','cover_photo_full_url','meta_image_full_url','cashback_percentage'];
 
     /**
      * The attributes that should be hidden for arrays.
@@ -72,6 +74,41 @@ class Restaurant extends Model
     protected $hidden = [
         'gst','free_delivery_distance'
     ];
+
+    public function bids()
+{
+    return $this->hasMany(RestaurantBid::class);
+}
+
+public function giftPoints()
+{
+    return $this->hasMany(RestaurantGiftPoint::class);
+}
+
+// Current active bid
+public function currentBid()
+{
+    return $this->hasOne(RestaurantBid::class)->where('is_active', true)->latest();
+}
+
+// Current active gift points
+public function currentGiftPoint()
+{
+    return $this->hasOne(RestaurantGiftPoint::class)->where('is_active', true)->latest();
+}
+
+    ///Badging criteria
+    public function getCashbackPercentageAttribute()
+{
+    if (!$this->badge) {
+        return 0;
+    }
+
+    return BadgeCashback::where('badge', $this->badge)
+        ->first()
+        ->cashback_percentage ?? 0;
+}
+
 
     public function getLogoFullUrlAttribute(){
         $value = $this->logo;
@@ -410,16 +447,37 @@ class Restaurant extends Model
         }
             return $query;
     }
+    // public function scopeMultiCuisine($query, $cuisine_id)
+    // {
+    //     $cuisine_id = json_decode($cuisine_id);
+    //     if(is_array($cuisine_id) && count($cuisine_id)>0){
+    //         return $query->whereHas('cuisine', function ($query) use ($cuisine_id){
+    //             $query->whereIn('cuisine_restaurant.cuisine_id', $cuisine_id);
+    //         });
+    //     }
+    //         return $query;
+    // }
     public function scopeMultiCuisine($query, $cuisine_id)
-    {
-        $cuisine_id = json_decode($cuisine_id);
-        if(is_array($cuisine_id) && count($cuisine_id)>0){
-            return $query->whereHas('cuisine', function ($query) use ($cuisine_id){
-                $query->whereIn('cuisine_restaurant.cuisine_id', $cuisine_id);
-            });
-        }
-            return $query;
+{
+    if (is_array($cuisine_id)) {
+        $ids = $cuisine_id;
     }
+
+    else if (is_string($cuisine_id)) {
+        $ids = json_decode($cuisine_id, true);
+    } else {
+        $ids = [];
+    }
+
+    if (is_array($ids) && count($ids) > 0) {
+        return $query->whereHas('cuisine', function ($query) use ($ids) {
+            $query->whereIn('cuisine_restaurant.cuisine_id', $ids);
+        });
+    }
+
+    return $query;
+}
+
 
     public function storage()
     {

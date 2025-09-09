@@ -59,6 +59,12 @@ class Order extends Model
         return $images;
     }
 
+    ////Third Party
+    public function thirdPartyCompany()
+    {
+        return $this->belongsTo(ThirdPartyCompany::class, 'third_party_company_id');
+    }
+
     private function isValidJson($string)
     {
         json_decode($string);
@@ -75,7 +81,7 @@ class Order extends Model
         return $this->hasOne(OrderReference::class, 'order_id');
     }
 
-    
+
     public function guest()
     {
         return $this->belongsTo(Guest::class, 'user_id','id');

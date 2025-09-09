@@ -6,7 +6,43 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="{{ dynamicAsset('public/assets/admin/css/tags-input.min.css') }}" rel="stylesheet">
 @endpush
+<style>
+    .upload-box,
+    .preview-wrapper {
+        width: 120px;
+        height: 120px;
+        border: 2px dashed #ccc;
+        border-radius: 8px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        background: #f9f9f9;
+    }
 
+    .preview-wrapper img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .preview-wrapper .delete-btn {
+        position: absolute;
+        top: 6px;
+        right: 6px;
+        background: rgba(255, 0, 0, 0.85);
+        color: #fff;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        font-size: 14px;
+        line-height: 22px;
+        cursor: pointer;
+    }
+</style>
 @section('content')
     <div class="content container-fluid">
         <!-- Page Header -->
@@ -66,8 +102,8 @@
                                         <label class="input-label" for="{{ $lang }}_name">
                                             {{ translate('messages.company_name') }} ({{ strtoupper($lang) }})
                                         </label>
-                                        <input type="text" name="company_name_{{ $lang }}" id="{{ $lang }}_name"
-                                            class="form-control"
+                                        <input type="text" name="company_name_{{ $lang }}"
+                                            id="{{ $lang }}_name" class="form-control"
                                             value="{{ $company->company_name }}"
                                             placeholder="{{ translate('messages.add_company_name') }}">
                                     </div>
@@ -85,18 +121,20 @@
                             <div class="d-flex flex-column align-items-center gap-3">
                                 <p class="mb-0">{{ translate('Company_Logo') }} </p>
                                 <div class="image-box">
-                                    <label for="image-input" class="d-flex flex-column align-items-center justify-content-center h-100 cursor-pointer gap-2">
-                                    <img class="upload-icon initial-26" src="{{ $company->image_full_url }}" alt="Upload Icon">
-                                    <img src="#" alt="Preview Image" class="preview-image">
+                                    <label for="image-input"
+                                        class="d-flex flex-column align-items-center justify-content-center h-100 cursor-pointer gap-2">
+                                        <img class="upload-icon initial-26" src="{{ $company->image_full_url }}"
+                                            alt="Upload Icon">
+                                        <img src="#" alt="Preview Image" class="preview-image">
                                     </label>
                                     <button type="button" class="delete_image">
-                                    <i class="tio-delete"></i>
+                                        <i class="tio-delete"></i>
                                     </button>
                                     <input type="file" id="image-input" name="image" accept="image/*" hidden>
                                 </div>
 
                                 <p class="opacity-75 max-w220 mx-auto text-center">
-                                    {{ translate('Image format - jpg png jpeg gif Image Size -maximum size 2 MB Image Ratio - 1:1')}}
+                                    {{ translate('Image format - jpg png jpeg gif Image Size -maximum size 2 MB Image Ratio - 1:1') }}
                                 </p>
                             </div>
                         </div>
@@ -117,16 +155,37 @@
                                     <div class="form-group mb-0">
                                         <label class="input-label">{{ translate('messages.Email') }}</label>
                                         <input type="email" class="form-control" name="company_email"
-                                            value="{{ $company->company_email }}"
-                                            placeholder="Enter company email">
+                                            value="{{ $company->company_email }}" placeholder="Enter company email">
                                     </div>
                                 </div>
                                 <div class="col-sm-6">
                                     <div class="form-group mb-0">
                                         <label class="input-label">{{ translate('messages.Phone') }}</label>
                                         <input type="text" class="form-control" name="company_phone"
-                                            value="{{ $company->company_phone }}"
-                                            placeholder="Enter company phone">
+                                            value="{{ $company->company_phone }}" placeholder="Enter company phone">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-sm-6 col-lg-6">
+                                    <div class="form-group mb-0">
+                                        <label class="input-label"
+                                            for="exampleFormControlSelect1">{{ translate('messages.company_type') }} <span
+                                                class="form-label-secondary text-danger" data-toggle="tooltip"
+                                                data-placement="right"
+                                                data-original-title="{{ translate('messages.Required.') }}"> *
+                                            </span><span class="input-label-secondary"></span></label>
+                                        <select name="company_type" class="form-control js-select2-custom h--45px"
+                                            required data-placeholder="{{ translate('messages.select_comapny_type') }}">
+                                            <option value="" readonly hidden>{{ translate('Ex:_XYZ_comapny') }}
+                                            </option>
+
+                                            <option value="Delivery Partner"
+                                                {{ $company->company_type == 'Delivery Partner' ? 'selected' : '' }}>
+                                                Delivery Partner
+                                            </option>
+                                        </select>
+
                                     </div>
                                 </div>
                             </div>
@@ -145,8 +204,48 @@
                         </div>
                         <div class="card-body">
                             <input type="text" class="form-control" name="company_address"
-                                value="{{ $company->company_address }}"
-                                placeholder="Enter company address">
+                                value="{{ $company->company_address }}" placeholder="Enter company address">
+                        </div>
+                    </div>
+                </div>
+                <!-- Company Documents -->
+                <div class="col-lg-12">
+                    <div class="card shadow--card-2 border-0 h-100">
+                        <div class="card-body">
+                            <div class="d-flex flex-column align-items-center gap-3">
+                                <p class="mb-0">{{ translate('Company_Documents') }}</p>
+
+                                <div class="d-flex flex-wrap gap-3 documents-preview">
+                                    @if (!empty($company->company_documents))
+                                        @foreach (explode(',', $company->company_documents) as $doc)
+                                            @if ($doc)
+                                                <div class="preview-wrapper">
+                                                    <img src="{{ asset('storage/company/documents/' . $doc) }}"
+                                                        alt="Document">
+                                                    <button type="button" class="delete-btn"
+                                                        data-doc="{{ $doc }}">🗑</button>
+                                                    <input type="hidden" name="remove_documents[]" value="old_doc.png">
+                                                </div>
+                                            @endif
+                                        @endforeach
+                                    @endif
+                                </div>
+
+                                <label for="company_documents" class="upload-box cursor-pointer">
+                                    <img width="30" class="upload-icon"
+                                        src="{{ dynamicAsset('public/assets/admin/img/upload-icon.png') }}"
+                                        alt="Upload Icon">
+                                    <span class="upload-text">{{ translate('Upload Image') }}</span>
+                                </label>
+                                <input type="file" id="company_documents" name="company_documents[]" accept="image/*"
+                                    multiple hidden>
+
+
+
+                                <p class="opacity-75 max-w220 mx-auto text-center">
+                                    {{ translate('Image format - jpg png jpeg gif Image Size - maximum size 2 MB Image Ratio - 1:1') }}
+                                </p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -223,6 +322,56 @@
                     englishInput.value = defaultInput.value;
                 });
             }
+        });
+        ///Company Documents preview
+        let selectedDocuments = [];
+
+        // Preloaded images
+        document.querySelectorAll('.documents-preview .delete-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                let wrapper = this.closest('.preview-wrapper');
+                wrapper.remove();
+
+                // hidden input banake backend ko batayenge ki kaunsa delete karna hai
+                let input = document.createElement('input');
+                input.type = "hidden";
+                input.name = "remove_documents[]";
+                input.value = this.dataset.doc;
+                document.getElementById('company_edit_form').appendChild(input);
+            });
+        });
+
+        // New uploads
+        document.getElementById('company_documents').addEventListener('change', function(e) {
+            let previewBox = document.querySelector('.documents-preview');
+            let files = Array.from(e.target.files);
+
+            selectedDocuments = selectedDocuments.concat(files);
+
+            files.forEach(file => {
+                if (file.type.startsWith('image/')) {
+                    let reader = new FileReader();
+                    reader.onload = function(event) {
+                        let wrapper = document.createElement('div');
+                        wrapper.classList.add('preview-wrapper');
+
+                        let img = document.createElement('img');
+                        img.src = event.target.result;
+
+                        let delBtn = document.createElement('button');
+                        delBtn.innerHTML = "🗑";
+                        delBtn.classList.add('delete-btn');
+                        delBtn.onclick = function() {
+                            wrapper.remove();
+                        };
+
+                        wrapper.appendChild(img);
+                        wrapper.appendChild(delBtn);
+                        previewBox.appendChild(wrapper);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
         });
     </script>
 @endpush

@@ -175,32 +175,64 @@
     <script src="{{dynamicAsset('public/assets/admin')}}/js/view-pages/deliveryman-earning-provide.js"></script>
     <script>
         "use strict";
+    // $('#deliveryman').select2({
+    //     ajax: {
+    //         url: '{{url('/')}}/admin/delivery-man/get-deliverymen',
+    //         data: function (params) {
+    //             return {
+    //                 q: params.term,
+    //                 earning: true,
+    //                 page: params.page
+    //             };
+    //         },
+    //         processResults: function (data) {
+    //             return {
+    //             results: data
+    //             };
+    //         },
+    //         __port: function (params, success, failure) {
+    //             let $request = $.ajax(params);
+
+    //             $request.then(success);
+    //             $request.fail(failure);
+
+    //             return $request;
+    //         }
+    //     }
+    // });
+
     $('#deliveryman').select2({
-        ajax: {
-            url: '{{url('/')}}/admin/delivery-man/get-deliverymen',
-            data: function (params) {
-                return {
-                    q: params.term, // search term
-                    earning: true,
-                    page: params.page
-                };
-            },
-            processResults: function (data) {
-                return {
-                results: data
-                };
-            },
-            __port: function (params, success, failure) {
-                let $request = $.ajax(params);
-
-                $request.then(success);
-                $request.fail(failure);
-
-                return $request;
-            }
+    ajax: {
+        url: '{{ url('/admin/delivery-man/get-deliverymen') }}',
+        data: function (params) {
+            return {
+                q: params.term
+            };
+        },
+        processResults: function (data) {
+            return {
+                results: data // response ko direct results me bhej do
+            };
         }
-    });
+    },
+    templateResult: formatDeliveryman,   // dropdown me dikhane ke liye
+    templateSelection: formatDeliverymanSelection // select hone ke baad dikhane ke liye
+});
 
+function formatDeliveryman (deliveryman) {
+    if (!deliveryman.id) {
+        return deliveryman.text;
+    }
+    let img = deliveryman.image_full_url
+              ? `<img src="${deliveryman.image_full_url}" width="30" height="30" style="border-radius:50%; margin-right:8px;" />`
+              : '';
+    return $(`<span>${img} ${deliveryman.text}</span>`);
+}
+
+function formatDeliverymanSelection (deliveryman) {
+    return deliveryman.text || deliveryman.id;
+}
+///get account data
     function getAccountData(route, data_id, type)
     {
         $.get({

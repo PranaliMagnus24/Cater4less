@@ -6,6 +6,45 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <link href="{{ dynamicAsset('public/assets/admin/css/tags-input.min.css') }}" rel="stylesheet">
 @endpush
+<style>
+    .upload-box,
+.preview-wrapper {
+    width: 120px;
+    height: 120px;
+    border: 2px dashed #ccc;
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    background: #f9f9f9;
+}
+
+.preview-wrapper img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.preview-wrapper .delete-btn {
+    position: absolute;
+    top: 6px;
+    right: 6px;
+    background: rgba(255,0,0,0.85);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    font-size: 14px;
+    line-height: 22px;
+    cursor: pointer;
+}
+
+
+</style>
 
 @section('content')
     <div class="content container-fluid">
@@ -183,6 +222,23 @@
                                     </div>
                                 </div>
                             </div>
+                            <div class="row g-2">
+                                <div class="col-sm-6 col-lg-6">
+                                    <div class="form-group mb-0">
+                                        <label class="input-label"
+                                            for="exampleFormControlSelect1">{{ translate('messages.company_type') }} <span
+                                                class="form-label-secondary text-danger" data-toggle="tooltip"
+                                                data-placement="right"
+                                                data-original-title="{{ translate('messages.Required.') }}"> *
+                                            </span><span class="input-label-secondary"></span></label>
+                                            <select name="company_type" class="form-control js-select2-custom h--45px" required
+                                            data-placeholder="{{ translate('messages.select_comapny_type') }}">
+                                            <option value="" readonly="true" hidden="true">{{ translate('Ex:_XYZ_comapny') }}</option>
+                                            <option value="Delivery Partner">Delivery Partner</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -200,6 +256,33 @@
                         </div>
                     </div>
                 </div>
+                <!-- Company Documents -->
+<div class="col-lg-12">
+    <div class="card shadow--card-2 border-0 h-100">
+        <div class="card-body">
+            <div class="d-flex flex-column align-items-center gap-3">
+                <p class="mb-0">{{ translate('Company_Documents') }}</p>
+
+                <div class="d-flex flex-wrap gap-3 documents-preview"></div>
+
+                <label for="company_documents"
+                       class="upload-box cursor-pointer">
+                    <img width="30" class="upload-icon"
+                         src="{{ dynamicAsset('public/assets/admin/img/upload-icon.png') }}"
+                         alt="Upload Icon">
+                    <span class="upload-text">{{ translate('Upload Image') }}</span>
+                </label>
+                <input type="file" id="company_documents" name="company_documents[]" accept="image/*" multiple hidden>
+
+                <p class="opacity-75 max-w220 mx-auto text-center">
+                    {{ translate('Image format - jpg png jpeg gif Image Size - maximum size 2 MB Image Ratio - 1:1') }}
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
                 <div class="col-lg-12">
                     <div class="btn--container justify-content-end">
                         <button type="reset" id="reset_btn"
@@ -283,5 +366,52 @@
                 });
             }
         });
+
+        ///Company Documents preview
+       let selectedDocuments = [];
+
+document.getElementById('company_documents').addEventListener('change', function (e) {
+    let previewBox = document.querySelector('.documents-preview');
+    let files = Array.from(e.target.files);
+
+    selectedDocuments = selectedDocuments.concat(files);
+    previewBox.innerHTML = "";
+
+    selectedDocuments.forEach((file, index) => {
+        if (file.type.startsWith('image/')) {
+            let reader = new FileReader();
+            reader.onload = function (event) {
+                let wrapper = document.createElement('div');
+                wrapper.classList.add('preview-wrapper');
+
+                let img = document.createElement('img');
+                img.src = event.target.result;
+
+                let delBtn = document.createElement('button');
+                delBtn.innerHTML = "🗑";
+                delBtn.classList.add('delete-btn');
+                delBtn.onclick = function () {
+                    selectedDocuments.splice(index, 1);
+                    updateFileInput();
+                    wrapper.remove();
+                };
+
+                wrapper.appendChild(img);
+                wrapper.appendChild(delBtn);
+                previewBox.appendChild(wrapper);
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+
+    updateFileInput();
+});
+
+function updateFileInput() {
+    let dt = new DataTransfer();
+    selectedDocuments.forEach(file => dt.items.add(file));
+    document.getElementById('company_documents').files = dt.files;
+}
+
     </script>
 @endpush

@@ -355,6 +355,10 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
             Route::get('offline-payment', 'OrderController@offline_payment')->name('offline_payment');
             Route::get('offline/payment/list/{status}', 'OrderController@offline_verification_list')->name('offline_verification_list');
             Route::put('add-dine-in-table-number/{order}', 'OrderController@add_dine_in_table_number')->name('add_dine_in_table_number');
+            //Third party
+            Route::post('assign-third-party/{order_id}', 'OrderController@assignThirdParty')->name('assign-third-party');
+
+
         });
 
 
@@ -901,6 +905,23 @@ Route::group(['namespace' => 'Admin', 'as' => 'admin.'], function () {
             Route::put('refund/reason_edit/', 'OrderController@reason_edit')->name('reason_edit');
             Route::delete('refund/reason_delete/{id}', 'OrderController@reason_delete')->name('reason_delete');
             Route::put('refund/order_refund_rejection/','OrderController@order_refund_rejection')->name('order_refund_rejection');
+
+        });
+
+        ////Badge Cashback Controller
+
+        Route::group(['prefix' => 'badge-cashback', 'as' => 'badge-cashback.', 'middleware' => ['module:badge_cashback']], function () {
+            Route::get('list', 'BadgeCashbackController@index')->name('list');
+            Route::post('update', 'BadgeCashbackController@update')->name('update');
+            Route::get('restaurant/list', 'BadgeCashbackController@restaurantBadges')->name('restaurant_list');
+            Route::get('restaurant/export', 'BadgeCashbackController@exportRestaurants')
+            ->name('restaurant_export');
+        });
+
+        ///Promotion controller code
+        Route::group(['prefix' => 'promotion', 'as' => 'promotion.', 'middleware' => ['admin']], function () {
+            Route::get('list', [\App\Http\Controllers\Admin\PromotionController::class, 'index'])->name('list');
+            Route::post('update/{id}', [\App\Http\Controllers\Admin\PromotionController::class, 'update'])->name('update');
         });
 
         Route::group(['prefix' => 'login-settings', 'as' => 'login-settings.', 'middleware' => ['module:settings']], function () {
